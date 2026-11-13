@@ -14,12 +14,362 @@ const STORAGE_KEYS = {
 };
 
 const ROUND_TIERS = [
-    { level: 1, nameEs: 'Muy Fácil', nameEn: 'Very Easy', points: 500 },
-    { level: 2, nameEs: 'Fácil', nameEn: 'Easy', points: 1000 },
-    { level: 3, nameEs: 'Intermedia', nameEn: 'Medium', points: 1500 },
-    { level: 4, nameEs: 'Difícil', nameEn: 'Hard', points: 2500 },
-    { level: 5, nameEs: 'Muy Difícil', nameEn: 'Expert', points: 4500 }
+    { level: 1, nameEs: 'Muy Fácil', nameEn: 'Very Easy', descEs: 'Muy Fácil (Inicial)', descEn: 'Very Easy (Starter)', points: 500 },
+    { level: 2, nameEs: 'Fácil', nameEn: 'Easy', descEs: 'Fácil (Básico)', descEn: 'Easy (Basic)', points: 1000 },
+    { level: 3, nameEs: 'Intermedia', nameEn: 'Medium', descEs: 'Intermedia', descEn: 'Intermediate', points: 1500 },
+    { level: 4, nameEs: 'Difícil', nameEn: 'Hard', descEs: 'Difícil (Avanzado)', descEn: 'Hard (Advanced)', points: 2500 },
+    { level: 5, nameEs: 'Muy Difícil', nameEn: 'Expert', descEs: 'Muy Difícil (Experto)', descEn: 'Very Hard (Expert)', points: 4500 }
 ];
+
+/* --------------------------------------------------------------------------
+   0. DICCIONARIO COMPLETO BILINGÜE (ES / EN)
+   -------------------------------------------------------------------------- */
+const I18N = {
+    es: {
+        badgeEdition: 'Edición Millonario',
+        mainSubtitle: 'Plataforma interactiva de trivias por niveles para el aula',
+        navPlay: 'Jugar',
+        navBanks: 'Bancos y Carga Masiva',
+        navRanking: 'Ranking',
+        navAbout: 'Cómo Jugar',
+        btnSettings: 'Audio',
+        settingsTitle: 'Sonido y Narrador',
+        btnTestVoice: 'Probar',
+        labelVoiceRate: 'Velocidad de lectura',
+        rateSlow: 'Lento (0.8x)',
+        rateNormal: 'Normal (1.0x)',
+        rateFast: 'Rápido (1.25x)',
+        labelNarrator: 'Voz del navegador',
+        defaultNarrator: 'Predeterminada del sistema',
+        labelAutoRead: 'Leer preguntas en voz alta',
+        labelSfx: 'Efectos de sonido (Millonario)',
+        testVoicePhrase: 'Bienvenido a UparTrivia Studio, edición Quién quiere ser Sabio.',
+
+        // Lobby / Inicio
+        lobbyTitle: 'Nueva Partida',
+        labelTeacher: 'Perfil Docente Activo',
+        btnAddTeacher: 'Nuevo Docente',
+        labelPlayer: 'Nombre del Jugador o Equipo',
+        placeholderPlayer: 'Ej. Sofía Martínez - 601',
+        labelTopicSelect: 'Temática de la Trivia',
+        labelMixMode: 'Mezclar varias temáticas',
+        labelQPerRound: 'Preguntas por Ronda',
+        optQ3: '3 por ronda (15 total - Rápida)',
+        optQ5: '5 por ronda (25 total - Clásica)',
+        labelAvailablePool: 'Preguntas Disponibles',
+        unitQuestions: 'preguntas',
+        unitQuestionsShort: 'preg',
+        unitRounds: 'Rondas',
+        btnStartNow: '¡Comenzar a Jugar Ahora!',
+        ladderPreviewTitle: 'Estructura de Rondas y Puntos',
+        ladderPreviewDesc: 'Supera cada ronda para asegurar tu puntaje acumulado. Si te equivocas, conservas los puntos asegurados de la última ronda completada.',
+        roundWord: 'Ronda',
+        ptsPerQ: 'pts / preg',
+        tipTitle: '3 Comodines Incluidos:',
+        tipDesc: '50:50 (descarta 2 opciones), Cambiar Pregunta y Pista del Público disponibles una vez por partida.',
+
+        // Juego en Vivo
+        hudPlayer: 'Jugador',
+        hudRound: 'Ronda',
+        hudScore: 'Puntaje Actual',
+        hudSafe: 'Asegurado',
+        hudTime: 'Tiempo',
+        lifelineSwap: 'Cambiar',
+        lifelineAudience: 'Público',
+        titleLifeline5050: 'Eliminar 2 respuestas incorrectas',
+        titleLifelineSwap: 'Cambiar por otra pregunta del mismo nivel',
+        titleLifelineAudience: 'Ver tendencia de votos del público',
+        titleSpeakQ: 'Leer pregunta y opciones en voz alta',
+        btnRetire: 'Plantarse / Retirarse',
+        liveLadderTitle: 'Escalera de Rondas',
+        questionWord: 'Pregunta',
+        ofWord: 'de',
+        feedbackCorrectPre: '¡Respuesta Correcta!',
+        feedbackPoints: 'puntos',
+        feedbackWrongPre: 'Respuesta incorrecta. La opción correcta era:',
+        mixedTopicLabel: 'Mixto',
+        topicsWord: 'temáticas',
+
+        // Bancos y Carga Masiva
+        myBanksTitle: 'Bancos de Preguntas',
+        unitBanks: 'bancos',
+        placeholderSearchBank: 'Buscar temática o docente...',
+        emptyBanks: 'No se encontraron bancos de preguntas.',
+        btnExportAll: 'Exportar Todo (JSON)',
+        btnRestoreDefaults: 'Restaurar Plantillas',
+        bulkCenterTitle: 'Centro de Carga Masiva Multiformato',
+        labelTargetBank: 'Nombre de la Temática / Banco',
+        placeholderTargetBank: 'Ej. Matemáticas 6° - Fracciones',
+        labelBulkAction: 'Modo de Carga',
+        optBulkAppend: 'Crear nuevo o añadir al existente',
+        optBulkReplace: 'Reemplazar preguntas si ya existe',
+        tabFmtExcel: '1. Excel / CSV',
+        tabFmtText: '2. Texto Plano',
+        tabFmtJson: '3. JSON',
+        btnSeeSample: 'Ver Ejemplo',
+        btnTemplateCsv: 'Plantilla Excel (.csv)',
+        btnTemplateTxt: 'Plantilla (.txt)',
+        btnTemplateJson: 'Plantilla (.json)',
+        guideExcelTitle: 'Cómo cargar desde Excel o Google Sheets:',
+        guideExcelDesc: 'Crea una tabla en Excel con <strong>6 o 7 columnas</strong>, selecciona las filas, cópialas (<code>Ctrl+C</code>) y pégalas abajo, o sube tu archivo <code>.csv</code>:',
+        chip1: '1. Pregunta',
+        chip2: '2. Respuesta Correcta',
+        chip3: '3. Incorrecta 1',
+        chip4: '4. Incorrecta 2',
+        chip5: '5. Incorrecta 3',
+        chip6: '6. Nivel (1 a 5, opc)',
+        chip7: '7. URL Imagen (opc)',
+        guideTextTitle: 'Cómo cargar en Texto Plano (una pregunta por línea):',
+        guideTextDesc: 'Escribe una pregunta por línea separando cada dato con barra <code>|</code>, punto y coma <code>;</code> o dos puntos <code>:</code>. La <strong>primera respuesta</strong> siempre debe ser la correcta (el juego las desordena al jugar):',
+        guideTextCode: 'Pregunta | Respuesta Correcta | Incorrecta 1 | Incorrecta 2 | Incorrecta 3 | Nivel(1-5) | URL_Imagen(opcional)',
+        guideJsonTitle: 'Cómo cargar en formato JSON (Compatible con tu versión anterior):',
+        guideJsonDesc: 'Acepta tanto objetos JSON modernos como el arreglo clásico <code>data_</code> de <em>TECHMATH</em>:',
+        placeholderBulkTextarea: 'Pega aquí tus preguntas desde Excel, texto plano o JSON...',
+        btnUploadFile: 'Subir Archivo (.csv, .txt, .json)',
+        btnProcessBulk: 'Procesar y Guardar Banco',
+        titleExportSingleBank: 'Exportar este banco en JSON',
+        titleDeleteBank: 'Eliminar banco',
+
+        // Ranking
+        rankingTitle: 'Tabla de Posiciones',
+        rankingSubtitle: 'Ordenado por mayor puntaje y menor tiempo empleado (desempate automático).',
+        filterAllTopics: 'Todas las Temáticas (General)',
+        filterAllTeachers: 'Todos los Docentes',
+        placeholderSearchPlayer: 'Buscar jugador...',
+        btnClearRanking: 'Vaciar Historial',
+        thPlayer: 'Jugador',
+        thTopic: 'Temática',
+        thTeacher: 'Docente',
+        thRound: 'Ronda',
+        thScore: 'Puntaje',
+        thTime: 'Tiempo',
+        thDate: 'Fecha',
+        emptyRanking: 'No hay registros de puntajes para este filtro todavía.',
+
+        // Acerca de / Cómo Jugar
+        aboutTitle: '¿Cómo funciona UparTrivia Studio?',
+        about1Title: '1. 5 Niveles de Dificultad',
+        about1Desc: 'La partida avanza a través de 5 rondas progresivas (Muy Fácil a Muy Difícil). Al completar todas las preguntas de una ronda, aseguras el puntaje acumulado.',
+        about2Title: '2. Retirarse vs Arriesgar',
+        about2Desc: 'Si decides "Plantarte / Retirarte" te llevas el puntaje total que tengas en ese momento. Si respondes mal, solo te llevas el último piso asegurado.',
+        about3Title: '3. Bancos Multiformato y Perfiles',
+        about3Desc: 'Cada docente puede crear sus temáticas pegando directamente desde Excel, texto separado por barras o archivos JSON, e incluso mezclar varios bancos en una misma partida.',
+        footerCreatedBy: 'Creado por',
+
+        // Modales y Notificaciones (Toasts)
+        toastFinishCurrentGame: 'Termina o retírate de la partida actual primero',
+        modalNewTeacherTitle: 'Nuevo Perfil Docente',
+        modalNewTeacherBody: 'Ingresa el nombre del docente para organizar sus propios bancos de preguntas y rankings:',
+        placeholderTeacherModal: 'Nombre del docente (ej. Prof. Kevin Florez)',
+        btnCancel: 'Cancelar',
+        btnCreateProfile: 'Crear Perfil',
+        toastProfileActivated: 'Perfil activado:',
+        toastSampleInserted: 'Ejemplo insertado. Haz clic en "Procesar y Guardar Banco" para probarlo.',
+        toastFileLoaded: 'Archivo cargado en el editor:',
+        toastNoValidQuestions: 'No se detectaron preguntas válidas. Revisa el formato guía.',
+        toastBankSavedPre: 'preguntas guardadas en',
+        toastKeepOneBank: 'Debes conservar al menos un banco de preguntas activo.',
+        toastBankDeleted: 'Banco eliminado',
+        toastDefaultsRestored: 'Plantillas oficiales restauradas',
+        toastEnterPlayerName: 'Por favor escribe el nombre del jugador o equipo para iniciar',
+        toastSelectOneTopic: 'Selecciona al menos una temática para jugar',
+        toastMin5Questions: 'El banco seleccionado necesita al menos 5 preguntas.',
+        toastRoundClearedPre: 'superada! Aseguras',
+        toastQuestionSwapped: 'Pregunta cambiada por otra del mismo nivel',
+        modalRetireTitle: '¿Deseas plantarte y retirarte?',
+        modalRetireBody: (score, sec) => `Si te retiras ahora, asegurarás tu puntaje actual de <strong>${score} puntos</strong> en un tiempo de <strong>${sec}s</strong>.`,
+        btnKeepPlaying: 'Seguir Jugando',
+        btnConfirmRetire: 'Sí, Retirarme con mis Puntos',
+        modalVictoryTitle: (p) => `¡Felicidades ${p}, eres Sabio Millonario! 🏆`,
+        modalRetiredTitle: (p) => `¡Buen retiro estratégico, ${p}! 🤝`,
+        modalWrongTitle: (p) => `Fin de la partida, ${p}`,
+        modalVictoryDesc: (s, t) => `Respondiste todas las rondas correctamente.<br>Puntaje Final: <strong>${s} pts</strong> en <strong>${t}s</strong>.`,
+        modalRetiredDesc: (s, t) => `Te retiraste a tiempo conservando tu puntaje actual:<br><strong>${s} pts</strong> en <strong>${t}s</strong>.`,
+        modalWrongDesc: (s, t) => `Te llevas el puntaje asegurado de tu última ronda completada:<br><strong>${s} pts</strong> (${t}s).`,
+        btnGoHome: 'Ir al Inicio',
+        btnSeeRanking: 'Ver Ranking 🏆',
+        modalClearRankTitle: '¿Vaciar historial de puntajes?',
+        modalClearRankBody: 'Se eliminarán todos los registros de la tabla de posiciones.',
+        btnConfirmClearRank: 'Sí, Borrar Todo',
+        toastRankingCleared: 'Historial de puntajes vaciado',
+        sampleBankDefaultName: 'Ciencias y Tecnología - Ejemplo',
+        importedBankDefaultName: 'Banco Importado'
+    },
+    en: {
+        badgeEdition: 'Millionaire Edition',
+        mainSubtitle: 'Interactive tiered trivia platform for the classroom',
+        navPlay: 'Play',
+        navBanks: 'Question Banks & Bulk Load',
+        navRanking: 'Ranking',
+        navAbout: 'How to Play',
+        btnSettings: 'Audio',
+        settingsTitle: 'Sound & Narrator',
+        btnTestVoice: 'Test',
+        labelVoiceRate: 'Speech rate',
+        rateSlow: 'Slow (0.8x)',
+        rateNormal: 'Normal (1.0x)',
+        rateFast: 'Fast (1.25x)',
+        labelNarrator: 'Browser voice',
+        defaultNarrator: 'System default',
+        labelAutoRead: 'Read questions aloud',
+        labelSfx: 'Sound effects (Millionaire)',
+        testVoicePhrase: 'Welcome to UparTrivia Studio, Millionaire classroom edition.',
+
+        // Lobby / Home
+        lobbyTitle: 'New Game Setup',
+        labelTeacher: 'Active Teacher Profile',
+        btnAddTeacher: 'New Teacher',
+        labelPlayer: 'Player or Team Name',
+        placeholderPlayer: 'E.g. Sofia Martinez - Grade 601',
+        labelTopicSelect: 'Trivia Topic',
+        labelMixMode: 'Mix multiple topics',
+        labelQPerRound: 'Questions per Round',
+        optQ3: '3 per round (15 total - Quick)',
+        optQ5: '5 per round (25 total - Classic)',
+        labelAvailablePool: 'Available Questions',
+        unitQuestions: 'questions',
+        unitQuestionsShort: 'q',
+        unitRounds: 'Rounds',
+        btnStartNow: 'Start Playing Now!',
+        ladderPreviewTitle: 'Round & Point Structure',
+        ladderPreviewDesc: 'Complete each round to lock in your safe score. If you miss a question, you keep the guaranteed points from the last completed round.',
+        roundWord: 'Round',
+        ptsPerQ: 'pts / q',
+        tipTitle: '3 Lifelines Included:',
+        tipDesc: '50:50 (removes 2 wrong options), Swap Question, and Ask the Audience available once per game.',
+
+        // Live Game
+        hudPlayer: 'Player',
+        hudRound: 'Round',
+        hudScore: 'Current Score',
+        hudSafe: 'Safe Score',
+        hudTime: 'Time',
+        lifelineSwap: 'Swap',
+        lifelineAudience: 'Audience',
+        titleLifeline5050: 'Remove 2 incorrect answers',
+        titleLifelineSwap: 'Swap for another question of the same level',
+        titleLifelineAudience: 'See audience voting trend',
+        titleSpeakQ: 'Read question and options aloud',
+        btnRetire: 'Walk Away / Take Points',
+        liveLadderTitle: 'Round Ladder',
+        questionWord: 'Question',
+        ofWord: 'of',
+        feedbackCorrectPre: 'Correct Answer!',
+        feedbackPoints: 'points',
+        feedbackWrongPre: 'Wrong answer. The correct option was:',
+        mixedTopicLabel: 'Mixed',
+        topicsWord: 'topics',
+
+        // Banks & Bulk Loader
+        myBanksTitle: 'Question Banks',
+        unitBanks: 'banks',
+        placeholderSearchBank: 'Search topic or teacher...',
+        emptyBanks: 'No question banks found.',
+        btnExportAll: 'Export All (JSON)',
+        btnRestoreDefaults: 'Restore Templates',
+        bulkCenterTitle: 'Multi-Format Bulk Loader',
+        labelTargetBank: 'Topic / Bank Name',
+        placeholderTargetBank: 'E.g. 6th Grade Math - Fractions',
+        labelBulkAction: 'Load Mode',
+        optBulkAppend: 'Create new or append to existing',
+        optBulkReplace: 'Replace questions if bank exists',
+        tabFmtExcel: '1. Excel / CSV',
+        tabFmtText: '2. Plain Text',
+        tabFmtJson: '3. JSON',
+        btnSeeSample: 'Insert Example',
+        btnTemplateCsv: 'Excel Template (.csv)',
+        btnTemplateTxt: 'Template (.txt)',
+        btnTemplateJson: 'Template (.json)',
+        guideExcelTitle: 'How to load from Excel or Google Sheets:',
+        guideExcelDesc: 'Create a table in Excel with <strong>6 or 7 columns</strong>, select the rows, copy them (<code>Ctrl+C</code>) and paste below, or upload a <code>.csv</code> file:',
+        chip1: '1. Question',
+        chip2: '2. Correct Answer',
+        chip3: '3. Wrong 1',
+        chip4: '4. Wrong 2',
+        chip5: '5. Wrong 3',
+        chip6: '6. Level (1 to 5, opt)',
+        chip7: '7. Image URL (opt)',
+        guideTextTitle: 'How to load from Plain Text (one question per line):',
+        guideTextDesc: 'Write one question per line separating fields with a pipe <code>|</code>, semicolon <code>;</code> or colon <code>:</code>. The <strong>first answer</strong> must always be the correct one (the game shuffles them automatically):',
+        guideTextCode: 'Question | Correct Answer | Wrong 1 | Wrong 2 | Wrong 3 | Level(1-5) | Image_URL(optional)',
+        guideJsonTitle: 'How to load in JSON format (Compatible with legacy TECHMATH):',
+        guideJsonDesc: 'Accepts both modern JSON objects and the classic <code>data_</code> array from <em>TECHMATH</em>:',
+        placeholderBulkTextarea: 'Paste your questions here from Excel, plain text, or JSON...',
+        btnUploadFile: 'Upload File (.csv, .txt, .json)',
+        btnProcessBulk: 'Process & Save Bank',
+        titleExportSingleBank: 'Export this bank as JSON',
+        titleDeleteBank: 'Delete bank',
+
+        // Ranking
+        rankingTitle: 'Leaderboard',
+        rankingSubtitle: 'Sorted by highest score and fastest completion time (automatic tie-breaker).',
+        filterAllTopics: 'All Topics (General)',
+        filterAllTeachers: 'All Teachers',
+        placeholderSearchPlayer: 'Search player...',
+        btnClearRanking: 'Clear History',
+        thPlayer: 'Player',
+        thTopic: 'Topic',
+        thTeacher: 'Teacher',
+        thRound: 'Round',
+        thScore: 'Score',
+        thTime: 'Time',
+        thDate: 'Date',
+        emptyRanking: 'No score records found for this filter yet.',
+
+        // About / How to Play
+        aboutTitle: 'How does UparTrivia Studio work?',
+        about1Title: '1. 5 Difficulty Tiers',
+        about1Desc: 'The game progresses through 5 rounds (Very Easy to Expert). Completing all questions in a round locks in your guaranteed safe score.',
+        about2Title: '2. Walk Away vs Risk It',
+        about2Desc: 'If you choose to "Walk Away", you keep 100% of your current score. If you answer incorrectly, you only take home your last guaranteed safe score.',
+        about3Title: '3. Multi-Format Banks & Teacher Profiles',
+        about3Desc: 'Each teacher can create their own topics by pasting directly from Excel, pipe-separated text, or JSON files, and even mix multiple banks in a single game.',
+        footerCreatedBy: 'Created by',
+
+        // Modals & Toasts
+        toastFinishCurrentGame: 'Finish or walk away from the current game first',
+        modalNewTeacherTitle: 'New Teacher Profile',
+        modalNewTeacherBody: 'Enter the teacher\'s name to organize their own question banks and leaderboards:',
+        placeholderTeacherModal: 'Teacher name (e.g. Prof. Kevin Florez)',
+        btnCancel: 'Cancel',
+        btnCreateProfile: 'Create Profile',
+        toastProfileActivated: 'Profile activated:',
+        toastSampleInserted: 'Sample inserted. Click "Process & Save Bank" to test it.',
+        toastFileLoaded: 'File loaded into editor:',
+        toastNoValidQuestions: 'No valid questions detected. Check the format guide.',
+        toastBankSavedPre: 'questions saved in',
+        toastKeepOneBank: 'You must keep at least one active question bank.',
+        toastBankDeleted: 'Bank deleted',
+        toastDefaultsRestored: 'Official templates restored',
+        toastEnterPlayerName: 'Please enter the player or team name to start',
+        toastSelectOneTopic: 'Select at least one topic to play',
+        toastMin5Questions: 'The selected bank needs at least 5 questions.',
+        toastRoundClearedPre: 'cleared! Safe score locked at',
+        toastQuestionSwapped: 'Question swapped for another of the same level',
+        modalRetireTitle: 'Walk away with your current points?',
+        modalRetireBody: (score, sec) => `If you walk away now, you will lock in your current score of <strong>${score} points</strong> with a time of <strong>${sec}s</strong>.`,
+        btnKeepPlaying: 'Keep Playing',
+        btnConfirmRetire: 'Yes, Walk Away with Points',
+        modalVictoryTitle: (p) => `Congratulations ${p}, you are a Millionaire Scholar! 🏆`,
+        modalRetiredTitle: (p) => `Smart strategic walk-away, ${p}! 🤝`,
+        modalWrongTitle: (p) => `Game Over, ${p}`,
+        modalVictoryDesc: (s, t) => `You answered all rounds correctly!<br>Final Score: <strong>${s} pts</strong> in <strong>${t}s</strong>.`,
+        modalRetiredDesc: (s, t) => `You walked away in time keeping your current score:<br><strong>${s} pts</strong> in <strong>${t}s</strong>.`,
+        modalWrongDesc: (s, t) => `You take home the guaranteed safe score from your last completed round:<br><strong>${s} pts</strong> (${t}s).`,
+        btnGoHome: 'Back to Home',
+        btnSeeRanking: 'View Ranking 🏆',
+        modalClearRankTitle: 'Clear leaderboard history?',
+        modalClearRankBody: 'All score records in the leaderboard will be permanently removed.',
+        btnConfirmClearRank: 'Yes, Clear All',
+        toastRankingCleared: 'Leaderboard history cleared',
+        sampleBankDefaultName: 'Science & Tech - Sample',
+        importedBankDefaultName: 'Imported Bank'
+    }
+};
+
+function t(key) {
+    return I18N[appState.lang]?.[key] ?? I18N.es[key] ?? key;
+}
 
 /* --------------------------------------------------------------------------
    1. BANCOS PREDEFINIDOS (MATEMÁTICAS TECHMATH Y CULTURA GENERAL DEPURADOS)
@@ -204,11 +554,13 @@ function loadVoices() {
     browserVoices = window.speechSynthesis.getVoices();
     const sel = document.getElementById('voiceNarratorSelect');
     if (!sel) return;
-    sel.innerHTML = `<option value="default">${appState.lang === 'es' ? 'Predeterminada del sistema' : 'System default'}</option>`;
+    const prevVal = sel.value || appState.audio.voiceURI;
+    sel.innerHTML = `<option value="default">${t('defaultNarrator')}</option>`;
     browserVoices.forEach(v => {
         const opt = document.createElement('option');
         opt.value = v.voiceURI;
         opt.textContent = `${v.name} (${v.lang})`;
+        if (v.voiceURI === prevVal) opt.selected = true;
         sel.appendChild(opt);
     });
 }
@@ -267,6 +619,7 @@ function showAppModal({ icon = 'fa-trophy', title, bodyHtml, showInput = false, 
     const inputEl = document.getElementById('appModalInput');
     if (showInput) {
         inputWrap.classList.remove('hidden');
+        inputEl.placeholder = t('placeholderTeacherModal');
         inputEl.value = '';
     } else {
         inputWrap.classList.add('hidden');
@@ -292,13 +645,13 @@ function showAppModal({ icon = 'fa-trophy', title, bodyHtml, showInput = false, 
 
 function switchView(viewName) {
     if (appState.game.active && viewName !== 'game') {
-        showToast('Termina o retírate de la partida actual primero', 'fa-triangle-exclamation');
+        showToast(t('toastFinishCurrentGame'), 'fa-triangle-exclamation');
         return;
     }
 
     document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
-    document.querySelectorAll('.nav-tab').forEach(t => {
-        t.classList.toggle('active', t.dataset.view === viewName);
+    document.querySelectorAll('.nav-tab').forEach(tEl => {
+        tEl.classList.toggle('active', tEl.dataset.view === viewName);
     });
 
     const targetMap = {
@@ -334,40 +687,229 @@ function applyTheme() {
 function toggleLanguage() {
     appState.lang = appState.lang === 'es' ? 'en' : 'es';
     localStorage.setItem(STORAGE_KEYS.LANG, appState.lang);
-    document.getElementById('langLabel').textContent = appState.lang.toUpperCase();
+    document.documentElement.lang = appState.lang;
     applyTranslations();
 }
 
+function setTextIfPresent(id, text) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = text;
+}
+
 function applyTranslations() {
-    const isEn = appState.lang === 'en';
-    document.getElementById('uiBadgeEdition').textContent = isEn ? 'Millionaire Edition' : 'Edición Millonario';
-    document.getElementById('uiMainSubtitle').textContent = isEn
-        ? 'Interactive tiered trivia platform for the classroom'
-        : 'Plataforma interactiva de trivias por niveles para el aula';
-    document.getElementById('uiNavPlay').textContent = isEn ? 'Play' : 'Jugar';
-    document.getElementById('uiNavBanks').textContent = isEn ? 'Question Banks & Bulk Load' : 'Bancos y Carga Masiva';
-    document.getElementById('uiNavRanking').textContent = 'Ranking';
-    document.getElementById('uiNavAbout').textContent = isEn ? 'How to Play' : 'Cómo Jugar';
-    document.getElementById('uiLobbyTitle').textContent = isEn ? 'New Game Setup' : 'Nueva Partida';
-    document.getElementById('uiLabelTeacher').textContent = isEn ? 'Active Teacher Profile' : 'Perfil Docente Activo';
-    document.getElementById('uiBtnAddTeacher').textContent = isEn ? 'New Teacher' : 'Nuevo Docente';
-    document.getElementById('uiLabelPlayer').textContent = isEn ? 'Student or Team Name' : 'Nombre del Jugador o Equipo';
-    document.getElementById('uiLabelTopicSelect').textContent = isEn ? 'Trivia Topic' : 'Temática de la Trivia';
-    document.getElementById('uiLabelMixMode').textContent = isEn ? 'Mix multiple topics' : 'Mezclar varias temáticas';
-    document.getElementById('uiLabelQPerRound').textContent = isEn ? 'Questions per Round' : 'Preguntas por Ronda';
-    document.getElementById('uiLabelAvailablePool').textContent = isEn ? 'Available Questions' : 'Preguntas Disponibles';
-    document.getElementById('uiBtnStartNow').textContent = isEn ? 'Start Playing Now!' : '¡Comenzar a Jugar Ahora!';
-    document.getElementById('uiLadderPreviewTitle').textContent = isEn ? 'Round & Point Structure' : 'Estructura de Rondas y Puntos';
-    document.getElementById('uiLadderPreviewDesc').textContent = isEn
-        ? 'Complete each round to lock in your safe score. If you miss a question, you keep the points from your last completed round.'
-        : 'Supera cada ronda para asegurar tu puntaje acumulado. Si te equivocas, conservas los puntos asegurados de la última ronda completada.';
-    document.getElementById('uiMyBanksTitle').textContent = isEn ? 'Saved Question Banks' : 'Bancos de Preguntas';
-    document.getElementById('uiBulkCenterTitle').textContent = isEn ? 'Multi-Format Bulk Loader' : 'Centro de Carga Masiva Multiformato';
-    document.getElementById('uiRankingTitle').textContent = isEn ? 'Leaderboard' : 'Tabla de Posiciones';
-    document.getElementById('uiRankingSubtitle').textContent = isEn
-        ? 'Sorted by highest score and fastest completion time.'
-        : 'Ordenado por mayor puntaje y menor tiempo empleado (desempate automático).';
-    updateLobbySummary();
+    setTextIfPresent('langLabel', appState.lang.toUpperCase());
+
+    // Cabecera y Navegación
+    setTextIfPresent('uiBadgeEdition', t('badgeEdition'));
+    setTextIfPresent('uiMainSubtitle', t('mainSubtitle'));
+    setTextIfPresent('uiNavPlay', t('navPlay'));
+    setTextIfPresent('uiNavBanks', t('navBanks'));
+    setTextIfPresent('uiNavRanking', t('navRanking'));
+    setTextIfPresent('uiNavAbout', t('navAbout'));
+    setTextIfPresent('uiBtnSettings', t('btnSettings'));
+
+    // Menú desplegable de Audio y Voz
+    setTextIfPresent('uiSettingsTitle', t('settingsTitle'));
+    setTextIfPresent('uiBtnTestVoice', t('btnTestVoice'));
+    setTextIfPresent('uiLabelVoiceRate', t('labelVoiceRate'));
+    setTextIfPresent('optRateSlow', t('rateSlow'));
+    setTextIfPresent('optRateNormal', t('rateNormal'));
+    setTextIfPresent('optRateFast', t('rateFast'));
+    setTextIfPresent('uiLabelNarrator', t('labelNarrator'));
+    setTextIfPresent('uiLabelAutoRead', t('labelAutoRead'));
+    setTextIfPresent('uiLabelSfx', t('labelSfx'));
+    loadVoices();
+
+    // Vista 1: Lobby / Inicio
+    setTextIfPresent('uiLobbyTitle', t('lobbyTitle'));
+    setTextIfPresent('uiLabelTeacher', t('labelTeacher'));
+    setTextIfPresent('uiBtnAddTeacher', t('btnAddTeacher'));
+    setTextIfPresent('uiLabelPlayer', t('labelPlayer'));
+    const playerInput = document.getElementById('playerNameInput');
+    if (playerInput) playerInput.placeholder = t('placeholderPlayer');
+    setTextIfPresent('uiLabelTopicSelect', t('labelTopicSelect'));
+    setTextIfPresent('uiLabelMixMode', t('labelMixMode'));
+    setTextIfPresent('uiLabelQPerRound', t('labelQPerRound'));
+
+    const qPerRoundSel = document.getElementById('questionsPerRoundSelect');
+    if (qPerRoundSel && qPerRoundSel.options.length >= 2) {
+        qPerRoundSel.options[0].textContent = t('optQ3');
+        qPerRoundSel.options[1].textContent = t('optQ5');
+    }
+
+    setTextIfPresent('uiLabelAvailablePool', t('labelAvailablePool'));
+    setTextIfPresent('uiBtnStartNow', t('btnStartNow'));
+    setTextIfPresent('uiLadderPreviewTitle', t('ladderPreviewTitle'));
+    setTextIfPresent('uiLadderPreviewDesc', t('ladderPreviewDesc'));
+
+    // Escalera previa del Lobby (Niveles 1 a 5)
+    ROUND_TIERS.forEach(tier => {
+        const tierBox = document.querySelector(`.ladder-tier.tier-${tier.level}`);
+        if (tierBox) {
+            const badge = tierBox.querySelector('.tier-badge');
+            const name = tierBox.querySelector('.tier-name');
+            const pts = tierBox.querySelector('.tier-points');
+            if (badge) badge.textContent = `${t('roundWord')} ${tier.level}`;
+            if (name) name.textContent = appState.lang === 'en' ? tier.descEn : tier.descEs;
+            if (pts) pts.textContent = `+${tier.points.toLocaleString()} ${t('ptsPerQ')}`;
+        }
+    });
+
+    setTextIfPresent('uiTipTitle', t('tipTitle'));
+    setTextIfPresent('uiTipDesc', t('tipDesc'));
+
+    // Vista 2: Juego en Vivo
+    setTextIfPresent('uiHudPlayer', t('hudPlayer'));
+    setTextIfPresent('uiHudRound', t('hudRound'));
+    setTextIfPresent('uiHudScore', t('hudScore'));
+    setTextIfPresent('uiHudSafe', t('hudSafe'));
+    setTextIfPresent('uiHudTime', t('hudTime'));
+    setTextIfPresent('uiLifelineSwap', t('lifelineSwap'));
+    setTextIfPresent('uiLifelineAudience', t('lifelineAudience'));
+    setTextIfPresent('uiBtnRetire', t('btnRetire'));
+    setTextIfPresent('uiLiveLadderTitle', t('liveLadderTitle'));
+
+    const l50 = document.getElementById('lifeline5050');
+    const lSw = document.getElementById('lifelineSwap');
+    const lAu = document.getElementById('lifelineAudience');
+    const lSp = document.querySelector('.btn-speak-q');
+    if (l50) l50.title = t('titleLifeline5050');
+    if (lSw) lSw.title = t('titleLifelineSwap');
+    if (lAu) lAu.title = t('titleLifelineAudience');
+    if (lSp) lSp.title = t('titleSpeakQ');
+
+    if (appState.game.active && appState.game.currentQuestion) {
+        const g = appState.game;
+        const tierInfo = ROUND_TIERS[g.currentRound - 1];
+        setTextIfPresent('gameCategoryBadge', `${g.currentQuestion.sourceTopic || g.topicLabel} • +${tierInfo.points} pts`);
+        setTextIfPresent('gameQuestionCounter', `${t('questionWord')} ${g.questionInRound} ${t('ofWord')} ${g.questionsPerRound} (${t('roundWord')} ${g.currentRound})`);
+        renderLiveLadder();
+    }
+
+    // Vista 3: Bancos y Centro de Carga Masiva Multiformato
+    setTextIfPresent('uiMyBanksTitle', t('myBanksTitle'));
+    const bankSearch = document.getElementById('bankSearchInput');
+    if (bankSearch) bankSearch.placeholder = t('placeholderSearchBank');
+    setTextIfPresent('uiBtnExportAll', t('btnExportAll'));
+    setTextIfPresent('uiBtnRestoreDefaults', t('btnRestoreDefaults'));
+    setTextIfPresent('uiBulkCenterTitle', t('bulkCenterTitle'));
+    setTextIfPresent('uiLabelTargetBank', t('labelTargetBank'));
+    const bulkNameInput = document.getElementById('bulkBankNameInput');
+    if (bulkNameInput) bulkNameInput.placeholder = t('placeholderTargetBank');
+    setTextIfPresent('uiLabelBulkAction', t('labelBulkAction'));
+    setTextIfPresent('optBulkAppend', t('optBulkAppend'));
+    setTextIfPresent('optBulkReplace', t('optBulkReplace'));
+
+    // Pestañas de formato (Excel, Texto Plano, JSON)
+    const tabExcel = document.querySelector('.format-tab[data-fmt="excel"] span');
+    const tabText = document.querySelector('.format-tab[data-fmt="text"] span');
+    const tabJson = document.querySelector('.format-tab[data-fmt="json"] span');
+    if (tabExcel) tabExcel.textContent = t('tabFmtExcel');
+    if (tabText) tabText.textContent = t('tabFmtText');
+    if (tabJson) tabJson.textContent = t('tabFmtJson');
+
+    // Guías de formato (Excel, Texto, JSON)
+    const guideExcel = document.getElementById('fmtGuideExcel');
+    if (guideExcel) {
+        guideExcel.innerHTML = `
+            <div class="guide-header">
+                <strong><i class="fa-solid fa-circle-check text-emerald"></i> ${t('guideExcelTitle')}</strong>
+                <div class="guide-actions">
+                    <button type="button" class="btn-mini" onclick="insertSampleIntoBulk('excel')">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> ${t('btnSeeSample')}
+                    </button>
+                    <button type="button" class="btn-mini" onclick="downloadTemplateFile('csv')">
+                        <i class="fa-solid fa-download"></i> ${t('btnTemplateCsv')}
+                    </button>
+                </div>
+            </div>
+            <p class="guide-text">${t('guideExcelDesc')}</p>
+            <div class="schema-chips">
+                <span>${t('chip1')}</span>
+                <span class="chip-correct">${t('chip2')}</span>
+                <span>${t('chip3')}</span>
+                <span>${t('chip4')}</span>
+                <span>${t('chip5')}</span>
+                <span>${t('chip6')}</span>
+                <span>${t('chip7')}</span>
+            </div>
+        `;
+    }
+
+    const guideText = document.getElementById('fmtGuideText');
+    if (guideText) {
+        guideText.innerHTML = `
+            <div class="guide-header">
+                <strong><i class="fa-solid fa-circle-check text-emerald"></i> ${t('guideTextTitle')}</strong>
+                <div class="guide-actions">
+                    <button type="button" class="btn-mini" onclick="insertSampleIntoBulk('text')">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> ${t('btnSeeSample')}
+                    </button>
+                    <button type="button" class="btn-mini" onclick="downloadTemplateFile('txt')">
+                        <i class="fa-solid fa-download"></i> ${t('btnTemplateTxt')}
+                    </button>
+                </div>
+            </div>
+            <p class="guide-text">${t('guideTextDesc')}</p>
+            <code class="code-sample">${t('guideTextCode')}</code>
+        `;
+    }
+
+    const guideJson = document.getElementById('fmtGuideJson');
+    if (guideJson) {
+        guideJson.innerHTML = `
+            <div class="guide-header">
+                <strong><i class="fa-solid fa-circle-check text-emerald"></i> ${t('guideJsonTitle')}</strong>
+                <div class="guide-actions">
+                    <button type="button" class="btn-mini" onclick="insertSampleIntoBulk('json')">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> ${t('btnSeeSample')}
+                    </button>
+                    <button type="button" class="btn-mini" onclick="downloadTemplateFile('json')">
+                        <i class="fa-solid fa-download"></i> ${t('btnTemplateJson')}
+                    </button>
+                </div>
+            </div>
+            <p class="guide-text">${t('guideJsonDesc')}</p>
+            <code class="code-sample">[ ["¿Cuánto es 5x7?", "", "35", "30", "40", "45", 1], ... ]  /  [ {"question":"...", "correct":"...", "wrong":["..."], "level":1} ]</code>
+        `;
+    }
+
+    const bulkRaw = document.getElementById('bulkRawTextarea');
+    if (bulkRaw) bulkRaw.placeholder = t('placeholderBulkTextarea');
+    setTextIfPresent('uiBtnUploadFile', t('btnUploadFile'));
+    setTextIfPresent('uiBtnProcessBulk', t('btnProcessBulk'));
+
+    // Vista 4: Ranking
+    setTextIfPresent('uiRankingTitle', t('rankingTitle'));
+    setTextIfPresent('uiRankingSubtitle', t('rankingSubtitle'));
+    const rankSearch = document.getElementById('rankingSearchInput');
+    if (rankSearch) rankSearch.placeholder = t('placeholderSearchPlayer');
+    setTextIfPresent('uiBtnClearRanking', t('btnClearRanking'));
+    setTextIfPresent('thPlayer', t('thPlayer'));
+    setTextIfPresent('thTopic', t('thTopic'));
+    setTextIfPresent('thTeacher', t('thTeacher'));
+    setTextIfPresent('thRound', t('thRound'));
+    setTextIfPresent('thScore', t('thScore'));
+    setTextIfPresent('thTime', t('thTime'));
+    setTextIfPresent('thDate', t('thDate'));
+
+    // Vista 5: Cómo Jugar / Acerca de
+    setTextIfPresent('uiAboutTitle', t('aboutTitle'));
+    setTextIfPresent('uiAbout1Title', t('about1Title'));
+    setTextIfPresent('uiAbout1Desc', t('about1Desc'));
+    setTextIfPresent('uiAbout2Title', t('about2Title'));
+    setTextIfPresent('uiAbout2Desc', t('about2Desc'));
+    setTextIfPresent('uiAbout3Title', t('about3Title'));
+    setTextIfPresent('uiAbout3Desc', t('about3Desc'));
+
+    const footerP = document.querySelector('.app-footer p');
+    if (footerP) {
+        footerP.innerHTML = `<strong>UparTrivia Studio</strong> — ${t('footerCreatedBy')} <a href="https://github.com/kevinluisfl" target="_blank">Kevin Luis Flórez Lozada (klfl)</a> 💻`;
+    }
+
+    updateLobbySelectors();
+    renderBanksList();
+    renderRankingTable();
 }
 
 /* --------------------------------------------------------------------------
@@ -439,13 +981,13 @@ function saveRankingToStorage() {
 function openNewTeacherModal() {
     showAppModal({
         icon: 'fa-user-tie',
-        title: 'Nuevo Perfil Docente',
-        bodyHtml: 'Ingresa el nombre del docente para organizar sus propios bancos de preguntas y rankings:',
+        title: t('modalNewTeacherTitle'),
+        bodyHtml: t('modalNewTeacherBody'),
         showInput: true,
         buttons: [
-            { label: 'Cancelar', className: 'btn-utility' },
+            { label: t('btnCancel'), className: 'btn-utility' },
             {
-                label: 'Crear Perfil',
+                label: t('btnCreateProfile'),
                 className: 'btn-primary-md',
                 onClick: (name) => {
                     if (!name) return;
@@ -455,7 +997,7 @@ function openNewTeacherModal() {
                     appState.activeTeacher = name;
                     saveTeachersToStorage();
                     updateLobbySelectors();
-                    showToast(`Perfil "${name}" activado`);
+                    showToast(`${t('toastProfileActivated')} "${name}"`);
                 }
             }
         ]
@@ -472,8 +1014,8 @@ function updateLobbySelectors() {
     const teacherSel = document.getElementById('teacherProfileSelect');
     if (!teacherSel) return;
 
-    teacherSel.innerHTML = appState.teachers.map(t =>
-        `<option value="${t}" ${t === appState.activeTeacher ? 'selected' : ''}>${t}</option>`
+    teacherSel.innerHTML = appState.teachers.map(tc =>
+        `<option value="${tc}" ${tc === appState.activeTeacher ? 'selected' : ''}>${tc}</option>`
     ).join('');
 
     const bankSel = document.getElementById('activeBankSelect');
@@ -485,8 +1027,9 @@ function updateLobbySelectors() {
         return a.title.localeCompare(b.title);
     });
 
+    const prevBankId = bankSel.value;
     bankSel.innerHTML = sortedBanks.map(b =>
-        `<option value="${b.id}">${b.title} (${b.questions.length} preg • ${b.teacher})</option>`
+        `<option value="${b.id}" ${b.id === prevBankId ? 'selected' : ''}>${b.title} (${b.questions.length} ${t('unitQuestionsShort')} • ${b.teacher})</option>`
     ).join('');
 
     multiBox.innerHTML = sortedBanks.map(b => `
@@ -495,7 +1038,7 @@ function updateLobbySelectors() {
                 <input type="checkbox" class="mix-bank-check" value="${b.id}" checked onchange="updateLobbySummary()">
                 ${b.title}
             </span>
-            <span class="badge-soft">${b.questions.length} preg</span>
+            <span class="badge-soft">${b.questions.length} ${t('unitQuestionsShort')}</span>
         </label>
     `).join('');
 
@@ -528,8 +1071,8 @@ function updateLobbySummary() {
     const qPerRound = parseInt(document.getElementById('questionsPerRoundSelect')?.value, 10) || 5;
     const poolEl = document.getElementById('lobbyPoolCount');
     const badgeEl = document.getElementById('uiLobbyRoundsBadge');
-    if (poolEl) poolEl.textContent = `${totalQ} ${appState.lang === 'en' ? 'questions' : 'preguntas'}`;
-    if (badgeEl) badgeEl.textContent = `5 ${appState.lang === 'en' ? 'Rounds' : 'Rondas'} • ${qPerRound * 5} ${appState.lang === 'en' ? 'Questions' : 'Preguntas'}`;
+    if (poolEl) poolEl.textContent = `${totalQ} ${t('unitQuestions')}`;
+    if (badgeEl) badgeEl.textContent = `5 ${t('unitRounds')} • ${qPerRound * 5} ${t('unitQuestions')}`;
 }
 
 /* --------------------------------------------------------------------------
@@ -549,7 +1092,7 @@ function insertSampleIntoBulk(fmt) {
     const textarea = document.getElementById('bulkRawTextarea');
     const nameInput = document.getElementById('bulkBankNameInput');
     if (!nameInput.value.trim()) {
-        nameInput.value = 'Ciencias y Tecnología - Ejemplo';
+        nameInput.value = t('sampleBankDefaultName');
     }
 
     if (fmt === 'excel') {
@@ -580,7 +1123,7 @@ function insertSampleIntoBulk(fmt) {
             }
         ], null, 2);
     }
-    showToast('Ejemplo insertado. Haz clic en "Procesar y Guardar Banco" para probarlo.');
+    showToast(t('toastSampleInserted'));
 }
 
 function downloadTemplateFile(type) {
@@ -639,7 +1182,7 @@ function handleBulkFileUpload(event) {
         else if (file.name.endsWith('.csv') || file.name.endsWith('.tsv')) switchBulkFormatTab('excel');
         else switchBulkFormatTab('text');
 
-        showToast(`Archivo "${file.name}" cargado en el editor`);
+        showToast(`${t('toastFileLoaded')} "${file.name}"`);
         event.target.value = '';
     };
     reader.readAsText(file);
@@ -748,12 +1291,12 @@ function parseUniversalQuestions(rawText) {
 
 function processBulkImport() {
     const raw = document.getElementById('bulkRawTextarea').value;
-    const bankTitle = document.getElementById('bulkBankNameInput').value.trim() || 'Banco Importado';
+    const bankTitle = document.getElementById('bulkBankNameInput').value.trim() || t('importedBankDefaultName');
     const mode = document.getElementById('bulkOperationMode').value;
 
     const parsedQuestions = parseUniversalQuestions(raw);
     if (parsedQuestions.length === 0) {
-        showToast('No se detectaron preguntas válidas. Revisa el formato guía.', 'fa-circle-exclamation');
+        showToast(t('toastNoValidQuestions'), 'fa-circle-exclamation');
         return;
     }
 
@@ -782,14 +1325,14 @@ function processBulkImport() {
     renderBanksList();
     updateLobbySelectors();
     document.getElementById('bulkRawTextarea').value = '';
-    showToast(`¡${parsedQuestions.length} preguntas guardadas en "${bankTitle}"!`);
+    showToast(`¡${parsedQuestions.length} ${t('toastBankSavedPre')} "${bankTitle}"!`);
 }
 
 function renderBanksList() {
     const container = document.getElementById('banksListContainer');
     if (!container) return;
     const query = (document.getElementById('bankSearchInput')?.value || '').trim().toLowerCase();
-    document.getElementById('totalBanksBadge').textContent = `${appState.banks.length} bancos`;
+    document.getElementById('totalBanksBadge').textContent = `${appState.banks.length} ${t('unitBanks')}`;
 
     const filtered = appState.banks.filter(b =>
         !query ||
@@ -798,7 +1341,7 @@ function renderBanksList() {
     );
 
     if (filtered.length === 0) {
-        container.innerHTML = `<p class="text-muted-sm">No se encontraron bancos de preguntas.</p>`;
+        container.innerHTML = `<p class="text-muted-sm">${t('emptyBanks')}</p>`;
         return;
     }
 
@@ -808,13 +1351,13 @@ function renderBanksList() {
             <div class="bank-item-card">
                 <div class="bank-item-info">
                     <h4>${b.title}</h4>
-                    <p><i class="fa-solid fa-chalkboard-user text-indigo"></i> ${b.teacher} • <strong>${b.questions.length} preg</strong> (N1:${byLvl[0]} N2:${byLvl[1]} N3:${byLvl[2]} N4:${byLvl[3]} N5:${byLvl[4]})</p>
+                    <p><i class="fa-solid fa-chalkboard-user text-indigo"></i> ${b.teacher} • <strong>${b.questions.length} ${t('unitQuestionsShort')}</strong> (L1:${byLvl[0]} L2:${byLvl[1]} L3:${byLvl[2]} L4:${byLvl[3]} L5:${byLvl[4]})</p>
                 </div>
                 <div class="bank-item-actions">
-                    <button class="btn-icon-sm" onclick="exportSingleBankJSON('${b.id}')" title="Exportar este banco en JSON">
+                    <button class="btn-icon-sm" onclick="exportSingleBankJSON('${b.id}')" title="${t('titleExportSingleBank')}">
                         <i class="fa-solid fa-download"></i>
                     </button>
-                    <button class="btn-icon-sm" onclick="deleteBank('${b.id}')" title="Eliminar banco">
+                    <button class="btn-icon-sm" onclick="deleteBank('${b.id}')" title="${t('titleDeleteBank')}">
                         <i class="fa-regular fa-trash-can"></i>
                     </button>
                 </div>
@@ -843,14 +1386,14 @@ function exportAllBanksJSON() {
 
 function deleteBank(bankId) {
     if (appState.banks.length <= 1) {
-        showToast('Debes conservar al menos un banco de preguntas activo.', 'fa-triangle-exclamation');
+        showToast(t('toastKeepOneBank'), 'fa-triangle-exclamation');
         return;
     }
     appState.banks = appState.banks.filter(b => b.id !== bankId);
     saveBanksToStorage();
     renderBanksList();
     updateLobbySelectors();
-    showToast('Banco eliminado');
+    showToast(t('toastBankDeleted'));
 }
 
 function restoreDefaultBanks() {
@@ -862,7 +1405,7 @@ function restoreDefaultBanks() {
     saveBanksToStorage();
     renderBanksList();
     updateLobbySelectors();
-    showToast('Plantillas oficiales restauradas');
+    showToast(t('toastDefaultsRestored'));
 }
 
 /* --------------------------------------------------------------------------
@@ -880,14 +1423,14 @@ function shuffleArray(arr) {
 function startNewGame() {
     const playerName = document.getElementById('playerNameInput').value.trim();
     if (!playerName) {
-        showToast('Por favor escribe el nombre del jugador o equipo para iniciar', 'fa-user-pen');
+        showToast(t('toastEnterPlayerName'), 'fa-user-pen');
         document.getElementById('playerNameInput').focus();
         return;
     }
 
     const selectedBanks = getSelectedBanksForGame();
     if (selectedBanks.length === 0) {
-        showToast('Selecciona al menos una temática para jugar', 'fa-circle-exclamation');
+        showToast(t('toastSelectOneTopic'), 'fa-circle-exclamation');
         return;
     }
 
@@ -897,7 +1440,7 @@ function startNewGame() {
     );
 
     if (combinedQuestions.length < 5) {
-        showToast('El banco seleccionado necesita al menos 5 preguntas.', 'fa-circle-exclamation');
+        showToast(t('toastMin5Questions'), 'fa-circle-exclamation');
         return;
     }
 
@@ -913,7 +1456,7 @@ function startNewGame() {
 
     const topicLabel = selectedBanks.length === 1
         ? selectedBanks[0].title
-        : `Mixto (${selectedBanks.length} temáticas)`;
+        : `${t('mixedTopicLabel')} (${selectedBanks.length} ${t('topicsWord')})`;
 
     clearInterval(appState.game.timerInterval);
     appState.game = {
@@ -967,7 +1510,7 @@ function renderLiveLadder() {
 
         return `
             <div class="live-step ${cls}">
-                <span>Ronda ${tier.level} • ${appState.lang === 'es' ? tier.nameEs : tier.nameEn}</span>
+                <span>${t('roundWord')} ${tier.level} • ${appState.lang === 'es' ? tier.nameEs : tier.nameEn}</span>
                 <span class="font-mono">+${roundTotal.toLocaleString()}</span>
             </div>
         `;
@@ -1003,7 +1546,7 @@ function loadNextGameQuestion() {
     const tierInfo = ROUND_TIERS[g.currentRound - 1];
     document.getElementById('gameCategoryBadge').textContent = `${nextQ.sourceTopic || g.topicLabel} • +${tierInfo.points} pts`;
     document.getElementById('gameQuestionCounter').textContent =
-        `Pregunta ${g.questionInRound} de ${g.questionsPerRound} (Ronda ${g.currentRound})`;
+        `${t('questionWord')} ${g.questionInRound} ${t('ofWord')} ${g.questionsPerRound} (${t('roundWord')} ${g.currentRound})`;
     document.getElementById('gameQuestionText').textContent = nextQ.question;
 
     const imgWrap = document.getElementById('gameImageWrapper');
@@ -1066,7 +1609,7 @@ function selectAnswer(idx) {
 
             feedback.className = 'game-feedback-banner text-emerald';
             feedback.style.color = '';
-            feedback.textContent = `¡Respuesta Correcta! +${tierPts.toLocaleString()} puntos 👏`;
+            feedback.textContent = `${t('feedbackCorrectPre')} +${tierPts.toLocaleString()} ${t('feedbackPoints')} 👏`;
             feedback.classList.remove('hidden');
 
             setTimeout(() => advanceAfterCorrect(), 1200);
@@ -1079,7 +1622,7 @@ function selectAnswer(idx) {
 
             feedback.className = 'game-feedback-banner';
             feedback.style.color = 'var(--danger)';
-            feedback.textContent = `Respuesta incorrecta. La opción correcta era: ${g.currentQuestion.correct}`;
+            feedback.textContent = `${t('feedbackWrongPre')} ${g.currentQuestion.correct}`;
             feedback.classList.remove('hidden');
 
             setTimeout(() => finishGameSession('wrong'), 1800);
@@ -1098,7 +1641,7 @@ function advanceAfterCorrect() {
             g.currentRound++;
             g.questionInRound = 1;
             playSoundEffect('roundUp');
-            showToast(`¡Ronda ${g.currentRound - 1} superada! Aseguras ${g.safeScore.toLocaleString()} pts`, 'fa-shield-halved');
+            showToast(`¡${t('roundWord')} ${g.currentRound - 1} ${t('toastRoundClearedPre')} ${g.safeScore.toLocaleString()} pts`, 'fa-shield-halved');
             loadNextGameQuestion();
         }
     } else {
@@ -1136,7 +1679,7 @@ function useLifelineSwap() {
     g.lifelines.swap = false;
     document.getElementById('lifelineSwap').disabled = true;
     playSoundEffect('lifeline');
-    showToast('Pregunta cambiada por otra del mismo nivel', 'fa-arrows-rotate');
+    showToast(t('toastQuestionSwapped'), 'fa-arrows-rotate');
     loadNextGameQuestion();
 }
 
@@ -1181,12 +1724,12 @@ function retireFromGame() {
 
     showAppModal({
         icon: 'fa-flag',
-        title: '¿Deseas plantarte y retirarte?',
-        bodyHtml: `Si te retiras ahora, asegurarás tu puntaje actual de <strong>${g.score.toLocaleString()} puntos</strong> en un tiempo de <strong>${g.seconds}s</strong>.`,
+        title: t('modalRetireTitle'),
+        bodyHtml: t('modalRetireBody')(g.score.toLocaleString(), g.seconds),
         buttons: [
-            { label: 'Seguir Jugando', className: 'btn-utility' },
+            { label: t('btnKeepPlaying'), className: 'btn-utility' },
             {
-                label: 'Sí, Retirarme con mis Puntos',
+                label: t('btnConfirmRetire'),
                 className: 'btn-primary-md',
                 onClick: () => finishGameSession('retired')
             }
@@ -1217,15 +1760,15 @@ function finishGameSession(reason) {
     }
 
     const titles = {
-        victory: `¡Felicidades ${g.player}, eres Sabio Millonario! 🏆`,
-        retired: `¡Buen retiro estratégico, ${g.player}! 🤝`,
-        wrong: `Fin de la partida, ${g.player}`
+        victory: t('modalVictoryTitle')(g.player),
+        retired: t('modalRetiredTitle')(g.player),
+        wrong: t('modalWrongTitle')(g.player)
     };
 
     const descriptions = {
-        victory: `Respondiste todas las rondas correctamente.<br>Puntaje Final: <strong>${finalAwardedScore.toLocaleString()} pts</strong> en <strong>${g.seconds}s</strong>.`,
-        retired: `Te retiraste a tiempo conservando tu puntaje actual:<br><strong>${finalAwardedScore.toLocaleString()} pts</strong> en <strong>${g.seconds}s</strong>.`,
-        wrong: `Te llevas el puntaje asegurado de tu última ronda completada:<br><strong>${finalAwardedScore.toLocaleString()} pts</strong> (${g.seconds}s).`
+        victory: t('modalVictoryDesc')(finalAwardedScore.toLocaleString(), g.seconds),
+        retired: t('modalRetiredDesc')(finalAwardedScore.toLocaleString(), g.seconds),
+        wrong: t('modalWrongDesc')(finalAwardedScore.toLocaleString(), g.seconds)
     };
 
     showAppModal({
@@ -1234,12 +1777,12 @@ function finishGameSession(reason) {
         bodyHtml: descriptions[reason],
         buttons: [
             {
-                label: 'Ir al Inicio',
+                label: t('btnGoHome'),
                 className: 'btn-utility',
                 onClick: () => switchView('home')
             },
             {
-                label: 'Ver Ranking 🏆',
+                label: t('btnSeeRanking'),
                 className: 'btn-primary-md',
                 onClick: () => switchView('ranking')
             }
@@ -1263,10 +1806,10 @@ function renderRankingTable() {
     const uniqueTopics = [...new Set(appState.ranking.map(r => r.topic))];
     const uniqueTeachers = [...new Set(appState.ranking.map(r => r.teacher))];
 
-    bankFilter.innerHTML = `<option value="all">Todas las Temáticas (General)</option>` +
+    bankFilter.innerHTML = `<option value="all">${t('filterAllTopics')}</option>` +
         uniqueTopics.map(tp => `<option value="${tp}" ${tp === currentTopic ? 'selected' : ''}>${tp}</option>`).join('');
 
-    teacherFilter.innerHTML = `<option value="all">Todos los Docentes</option>` +
+    teacherFilter.innerHTML = `<option value="all">${t('filterAllTeachers')}</option>` +
         uniqueTeachers.map(tc => `<option value="${tc}" ${tc === currentTeacher ? 'selected' : ''}>${tc}</option>`).join('');
 
     const filtered = appState.ranking
@@ -1280,7 +1823,7 @@ function renderRankingTable() {
 
     const tbody = document.getElementById('rankingTableBody');
     if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 2rem; color: var(--text-muted);">No hay registros de puntajes para este filtro todavía.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 2rem; color: var(--text-muted);">${t('emptyRanking')}</td></tr>`;
         return;
     }
 
@@ -1293,7 +1836,7 @@ function renderRankingTable() {
                 <td><strong>${row.player}</strong></td>
                 <td><span class="badge-soft">${row.topic}</span></td>
                 <td>${row.teacher}</td>
-                <td>Ronda ${row.round}</td>
+                <td>${t('roundWord')} ${row.round}</td>
                 <td class="font-mono text-emerald"><strong>${Number(row.score).toLocaleString()} pts</strong></td>
                 <td class="font-mono">${row.time}s</td>
                 <td style="font-size:0.75rem; color:var(--text-muted);">${row.date}</td>
@@ -1306,19 +1849,19 @@ function clearRankingHistory() {
     if (appState.ranking.length === 0) return;
     showAppModal({
         icon: 'fa-trash-can',
-        title: '¿Vaciar historial de puntajes?',
-        bodyHtml: 'Se eliminarán todos los registros de la tabla de posiciones.',
+        title: t('modalClearRankTitle'),
+        bodyHtml: t('modalClearRankBody'),
         buttons: [
-            { label: 'Cancelar', className: 'btn-utility' },
+            { label: t('btnCancel'), className: 'btn-utility' },
             {
-                label: 'Sí, Borrar Todo',
+                label: t('btnConfirmClearRank'),
                 className: 'btn-danger-sm',
                 onClick: () => {
                     appState.ranking = [];
                     localStorage.removeItem('datos');
                     saveRankingToStorage();
                     renderRankingTable();
-                    showToast('Historial de puntajes vaciado');
+                    showToast(t('toastRankingCleared'));
                 }
             }
         ]
@@ -1394,6 +1937,6 @@ window.addEventListener('DOMContentLoaded', () => {
         appState.audio.sfx = e.target.checked;
     });
     document.getElementById('btnTestVoice').addEventListener('click', () => {
-        speakText('Bienvenido a UparTrivia Studio, edición Quién quiere ser Sabio.');
+        speakText(t('testVoicePhrase'));
     });
 });
