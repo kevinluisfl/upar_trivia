@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="es" class="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UparTrivia Studio - Quién Quiere Ser Sabio</title>
+
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Hoja de estilos externa modular -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+    <!-- Contenedor de Notificaciones Toast -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- ==================== BARRA SUPERIOR ESTILO STUDIO ==================== -->
+    <header class="app-header">
+        <div class="header-container">
+            <!-- Logo y Título -->
+            <div class="brand-group">
+                <div class="brand-icon">
+                    <i class="fa-solid fa-Graduation-Cap fa-brain"></i>
+                </div>
+                <div>
+                    <div class="brand-title-row">
+                        <h1>UparTrivia <span class="text-indigo">Studio</span></h1>
+                        <span id="uiBadgeEdition" class="badge-pill">Edición Millonario</span>
+                    </div>
+                    <p id="uiMainSubtitle">Plataforma interactiva de trivias por niveles para el aula</p>
+                </div>
+            </div>
+
+            <!-- Navegación Principal SPA -->
+            <nav class="nav-tabs" id="mainNavTabs">
+                <button class="nav-tab active" data-view="home" onclick="switchView('home')">
+                    <i class="fa-solid fa-play"></i>
+                    <span id="uiNavPlay">Jugar</span>
+                </button>
+                <button class="nav-tab" data-view="banks" onclick="switchView('banks')">
+                    <i class="fa-solid fa-database"></i>
+                    <span id="uiNavBanks">Bancos y Carga Masiva</span>
+                </button>
+                <button class="nav-tab" data-view="ranking" onclick="switchView('ranking')">
+                    <i class="fa-solid fa-trophy"></i>
+                    <span id="uiNavRanking">Ranking</span>
+                </button>
+                <button class="nav-tab" data-view="about" onclick="switchView('about')">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span id="uiNavAbout">Cómo Jugar</span>
+                </button>
+            </nav>
+
+            <!-- Utilidades Globales (Idioma, Tema, Audio/Voz) -->
+            <div class="header-utilities">
+                <button id="btnLangToggle" class="btn-utility" title="Cambiar Idioma / Switch Language">
+                    <i class="fa-solid fa-globe text-indigo"></i>
+                    <span id="langLabel">ES</span>
+                </button>
+
+                <button id="btnThemeToggle" class="btn-utility btn-icon-only" title="Cambiar tema Claro / Oscuro">
+                    <i id="themeIcon" class="fa-solid fa-moon text-indigo"></i>
+                </button>
+
+                <div class="settings-dropdown-wrapper">
+                    <button id="btnSettingsToggle" class="btn-utility" title="Ajustes de Sonido y Voz">
+                        <i class="fa-solid fa-sliders text-indigo"></i>
+                        <span id="uiBtnSettings" class="hide-sm">Audio</span>
+                    </button>
+
+                    <!-- Popover de Audio y Narrador -->
+                    <div id="settingsMenu" class="settings-popover hidden">
+                        <div class="settings-popover-header">
+                            <h4><i class="fa-solid fa-volume-high text-indigo"></i> <span id="uiSettingsTitle">Sonido y Narrador</span></h4>
+                            <button id="btnTestVoice" class="btn-test-voice" type="button">
+                                <i class="fa-solid fa-play"></i> <span id="uiBtnTestVoice">Probar</span>
+                            </button>
+                        </div>
+
+                        <div class="settings-group">
+                            <label for="voiceRateSelect" id="uiLabelVoiceRate">Velocidad de lectura</label>
+                            <select id="voiceRateSelect">
+                                <option value="0.8" id="optRateSlow">Lento (0.8x)</option>
+                                <option value="1" selected id="optRateNormal">Normal (1.0x)</option>
+                                <option value="1.25" id="optRateFast">Rápido (1.25x)</option>
+                            </select>
+                        </div>
+
+                        <div class="settings-group">
+                            <label for="voiceNarratorSelect" id="uiLabelNarrator">Voz del navegador</label>
+                            <select id="voiceNarratorSelect">
+                                <option value="default">Predeterminada del sistema</option>
+                            </select>
+                        </div>
+
+                        <div class="settings-divider"></div>
+
+                        <label class="settings-switch-row" for="autoReadToggle">
+                            <span class="switch-label">
+                                <i class="fa-solid fa-microphone-lines text-indigo"></i>
+                                <span id="uiLabelAutoRead">Leer preguntas en voz alta</span>
+                            </span>
+                            <input type="checkbox" id="autoReadToggle">
+                        </label>
+
+                        <label class="settings-switch-row" for="sfxToggle">
+                            <span class="switch-label">
+                                <i class="fa-solid fa-music text-indigo"></i>
+                                <span id="uiLabelSfx">Efectos de sonido (Millonario)</span>
+                            </span>
+                            <input type="checkbox" id="sfxToggle" checked>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ==================== CONTENEDOR PRINCIPAL DE VISTAS ==================== -->
+    <main class="main-container">
+
+        <!-- =====================================================================
+             VISTA 1: INICIO Y CONFIGURACIÓN DE PARTIDA (HOME / LOBBY)
+             ===================================================================== -->
+        <section id="viewHome" class="view-section active">
+            <div class="home-grid">
+
+                <!-- Columna Izquierda: Configuración de Jugador y Perfil Docente -->
+                <div class="studio-card">
+                    <div class="card-section-header">
+                        <h2><i class="fa-solid fa-rocket text-indigo"></i> <span id="uiLobbyTitle">Nueva Partida</span></h2>
+                        <span class="badge-soft" id="uiLobbyRoundsBadge">5 Rondas • 25 Preguntas</span>
+                    </div>
+
+                    <!-- Selector de Perfil Docente -->
+                    <div class="form-group">
+                        <div class="label-row">
+                            <label for="teacherProfileSelect" id="uiLabelTeacher">Perfil Docente Activo</label>
+                            <button type="button" class="btn-link-xs" onclick="openNewTeacherModal()">
+                                <i class="fa-solid fa-user-plus"></i> <span id="uiBtnAddTeacher">Nuevo Docente</span>
+                            </button>
+                        </div>
+                        <select id="teacherProfileSelect" onchange="handleTeacherChange(this.value)"></select>
+                    </div>
+
+                    <!-- Nombre del Estudiante / Jugador -->
+                    <div class="form-group">
+                        <label for="playerNameInput" id="uiLabelPlayer">Nombre del Jugador o Equipo</label>
+                        <input type="text" id="playerNameInput" placeholder="Ej. Sofía Martínez - 601" maxlength="35">
+                    </div>
+
+                    <!-- Modo de Selección de Temática (Única vs Mixta) -->
+                    <div class="form-group">
+                        <div class="label-row">
+                            <label id="uiLabelTopicSelect">Temática de la Trivia</label>
+                            <label class="inline-checkbox">
+                                <input type="checkbox" id="mixTopicsToggle" onchange="toggleMixTopicsMode()">
+                                <span id="uiLabelMixMode">Mezclar varias temáticas</span>
+                            </label>
+                        </div>
+
+                        <!-- Selector de Temática Única -->
+                        <div id="singleTopicWrapper">
+                            <select id="activeBankSelect" onchange="updateLobbySummary()"></select>
+                        </div>
+
+                        <!-- Selector Múltiple para Modo Mixto -->
+                        <div id="multiTopicWrapper" class="multi-topic-box hidden"></div>
+                    </div>
+
+                    <!-- Cantidad de preguntas por ronda -->
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label for="questionsPerRoundSelect" id="uiLabelQPerRound">Preguntas por Ronda</label>
+                            <select id="questionsPerRoundSelect" onchange="updateLobbySummary()">
+                                <option value="3">3 por ronda (15 total - Rápida)</option>
+                                <option value="5" selected>5 por ronda (25 total - Clásica)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label id="uiLabelAvailablePool">Preguntas Disponibles</label>
+                            <div class="stat-pill-box">
+                                <i class="fa-solid fa-layer-group text-indigo"></i>
+                                <span id="lobbyPoolCount">0 preguntas</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button id="btnStartGame" class="btn-primary-xl" onclick="startNewGame()">
+                        <i class="fa-solid fa-play"></i>
+                        <span id="uiBtnStartNow">¡Comenzar a Jugar Ahora!</span>
+                    </button>
+                </div>
+
+                <!-- Columna Derecha: Escalera de Premios y Resumen Rápido -->
+                <div class="studio-card">
+                    <div class="card-section-header">
+                        <h2><i class="fa-solid fa-stairs text-indigo"></i> <span id="uiLadderPreviewTitle">Estructura de Rondas y Puntos</span></h2>
+                    </div>
+                    <p class="text-muted-sm" id="uiLadderPreviewDesc">
+                        Supera cada ronda para asegurar tu puntaje acumulado. Si te equivocas, conservas los puntos asegurados de la última ronda completada.
+                    </p>
+
+                    <div class="ladder-preview-list">
+                        <div class="ladder-tier tier-5">
+                            <span class="tier-badge">Ronda 5</span>
+                            <span class="tier-name" id="uiTier5Name">Muy Difícil (Experto)</span>
+                            <span class="tier-points">+4,500 pts / preg</span>
+                        </div>
+                        <div class="ladder-tier tier-4">
+                            <span class="tier-badge">Ronda 4</span>
+                            <span class="tier-name" id="uiTier4Name">Difícil (Avanzado)</span>
+                            <span class="tier-points">+2,500 pts / preg</span>
+                        </div>
+                        <div class="ladder-tier tier-3">
+                            <span class="tier-badge">Ronda 3</span>
+                            <span class="tier-name" id="uiTier3Name">Intermedia</span>
+                            <span class="tier-points">+1,500 pts / preg</span>
+                        </div>
+                        <div class="ladder-tier tier-2">
+                            <span class="tier-badge">Ronda 2</span>
+                            <span class="tier-name" id="uiTier2Name">Fácil (Básico)</span>
+                            <span class="tier-points">+1,000 pts / preg</span>
+                        </div>
+                        <div class="ladder-tier tier-1">
+                            <span class="tier-badge">Ronda 1</span>
+                            <span class="tier-name" id="uiTier1Name">Muy Fácil (Inicial)</span>
+                            <span class="tier-points">+500 pts / preg</span>
+                        </div>
+                    </div>
+
+                    <div class="Quick-tip-banner">
+                        <i class="fa-solid fa-wand-magic-sparkles text-indigo"></i>
+                        <div>
+                            <strong id="uiTipTitle">3 Comodines Incluidos:</strong>
+                            <p id="uiTipDesc">50:50 (descarta 2 opciones), Cambiar Pregunta y Pista del Público disponibles una vez por partida.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- =====================================================================
+             VISTA 2: PARTIDA EN VIVO ESTILO "QUIÉN QUIERE SER MILLONARIO"
+             ===================================================================== -->
+        <section id="viewGame" class="view-section">
+            <div class="game-layout">
+
+                <!-- Panel Izquierdo: Escenario de Pregunta y Opciones -->
+                <div class="game-stage-card studio-card">
+                    <!-- Barra de Estado de la Partida -->
+                    <div class="game-hud">
+                        <div class="hud-item">
+                            <span class="hud-label" id="uiHudPlayer">Jugador</span>
+                            <strong id="gamePlayerName" class="hud-value">---</strong>
+                        </div>
+                        <div class="hud-item">
+                            <span class="hud-label" id="uiHudRound">Ronda</span>
+                            <strong id="gameRoundDisplay" class="hud-value text-indigo">1 / 5</strong>
+                        </div>
+                        <div class="hud-item">
+                            <span class="hud-label" id="uiHudScore">Puntaje Actual</span>
+                            <strong id="gameCurrentScore" class="hud-value text-emerald">0</strong>
+                        </div>
+                        <div class="hud-item">
+                            <span class="hud-label" id="uiHudSafe">Asegurado</span>
+                            <strong id="gameSafeScore" class="hud-value text-amber">0</strong>
+                        </div>
+                        <div class="hud-item">
+                            <span class="hud-label" id="uiHudTime">Tiempo</span>
+                            <strong id="gameTimerDisplay" class="hud-value font-mono">0s</strong>
+                        </div>
+                    </div>
+
+                    <!-- Barra de Comodines y Botón Retirarse -->
+                    <div class="lifelines-bar">
+                        <div class="lifelines-group">
+                            <button id="lifeline5050" class="btn-lifeline" onclick="useLifeline5050()" title="Eliminar 2 respuestas incorrectas">
+                                <i class="fa-solid fa-divide"></i>
+                                <span>50 : 50</span>
+                            </button>
+                            <button id="lifelineSwap" class="btn-lifeline" onclick="useLifelineSwap()" title="Cambiar por otra pregunta del mismo nivel">
+                                <i class="fa-solid fa-arrows-rotate"></i>
+                                <span id="uiLifelineSwap">Cambiar</span>
+                            </button>
+                            <button id="lifelineAudience" class="btn-lifeline" onclick="useLifelineAudience()" title="Ver tendencia de votos del público">
+                                <i class="fa-solid fa-users-viewfinder"></i>
+                                <span id="uiLifelineAudience">Público</span>
+                            </button>
+                            <button class="btn-lifeline btn-speak-q" onclick="speakCurrentQuestion()" title="Leer pregunta y opciones en voz alta">
+                                <i class="fa-solid fa-volume-high"></i>
+                            </button>
+                        </div>
+
+                        <button id="btnRetireGame" class="btn-retire" onclick="retireFromGame()">
+                            <i class="fa-solid fa-flag"></i>
+                            <span id="uiBtnRetire">Plantarse / Retirarse</span>
+                        </button>
+                    </div>
+
+                    <!-- Tarjeta de la Pregunta Activa -->
+                    <div class="question-box">
+                        <div class="question-meta">
+                            <span id="gameCategoryBadge" class="badge-pill">Temática</span>
+                            <span id="gameQuestionCounter" class="question-counter">Pregunta 1 de 5 (Ronda 1)</span>
+                        </div>
+                        <h2 id="gameQuestionText" class="question-title">¿Cargando pregunta?</h2>
+
+                        <!-- Contenedor Inteligente de Imagen (Solo se muestra si la URL existe y carga bien) -->
+                        <div id="gameImageWrapper" class="question-image-wrapper hidden">
+                            <img id="gameQuestionImage" src="" alt="Ilustración de pregunta">
+                        </div>
+
+                        <!-- Gráfico de ayuda del público (oculto por defecto) -->
+                        <div id="audienceChartBox" class="audience-chart-box hidden"></div>
+
+                        <!-- Mensaje de confirmación en vivo -->
+                        <div id="gameFeedbackBanner" class="game-feedback-banner hidden"></div>
+                    </div>
+
+                    <!-- Cuadrícula de 4 Opciones estilo Millonario -->
+                    <div class="answers-grid">
+                        <button id="ansBtn0" class="answer-option" onclick="selectAnswer(0)">
+                            <span class="ans-letter">A</span>
+                            <span class="ans-text" id="ansText0">Opción A</span>
+                        </button>
+                        <button id="ansBtn1" class="answer-option" onclick="selectAnswer(1)">
+                            <span class="ans-letter">B</span>
+                            <span class="ans-text" id="ansText1">Opción B</span>
+                        </button>
+                        <button id="ansBtn2" class="answer-option" onclick="selectAnswer(2)">
+                            <span class="ans-letter">C</span>
+                            <span class="ans-text" id="ansText2">Opción C</span>
+                        </button>
+                        <button id="ansBtn3" class="answer-option" onclick="selectAnswer(3)">
+                            <span class="ans-letter">D</span>
+                            <span class="ans-text" id="ansText3">Opción D</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Panel Derecho: Escalera de Progreso en Tiempo Real -->
+                <aside class="game-ladder-card studio-card">
+                    <h3 class="ladder-side-title"><i class="fa-solid fa-Parthenon fa-award text-indigo"></i> <span id="uiLiveLadderTitle">Escalera de Rondas</span></h3>
+                    <div id="liveLadderContainer" class="live-ladder-container">
+                        <!-- Renderizado dinámicamente por JS -->
+                    </div>
+                </aside>
+
+            </div>
+        </section>
+
+        <!-- =====================================================================
+             VISTA 3: GESTOR DE BANCOS Y CARGA MASIVA MULTIFORMATO
+             ===================================================================== -->
+        <section id="viewBanks" class="view-section">
+            <div class="banks-grid">
+
+                <!-- Panel Izquierdo: Mis Bancos de Preguntas Guardados -->
+                <div class="studio-card">
+                    <div class="card-section-header">
+                        <h2><i class="fa-solid fa-folder-tree text-indigo"></i> <span id="uiMyBanksTitle">Bancos de Preguntas</span></h2>
+                        <span id="totalBanksBadge" class="badge-soft">0 bancos</span>
+                    </div>
+
+                    <!-- Buscador y Filtro por Docente -->
+                    <div class="search-box-wrapper">
+                        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                        <input type="text" id="bankSearchInput" oninput="renderBanksList()" placeholder="Buscar temática o docente...">
+                    </div>
+
+                    <!-- Lista de Bancos -->
+                    <div id="banksListContainer" class="banks-list-container"></div>
+
+                    <!-- Acciones Globales de Respaldo -->
+                    <div class="bank-footer-actions">
+                        <button class="btn-utility" onclick="exportAllBanksJSON()">
+                            <i class="fa-solid fa-file-export text-indigo"></i>
+                            <span id="uiBtnExportAll">Exportar Todo (JSON)</span>
+                        </button>
+                        <button class="btn-utility" onclick="restoreDefaultBanks()">
+                            <i class="fa-solid fa-rotate-left text-indigo"></i>
+                            <span id="uiBtnRestoreDefaults">Restaurar Plantillas</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Panel Derecho: Centro de Carga Masiva Multiformato con Instrucciones Claras -->
+                <div class="studio-card">
+                    <div class="card-section-header">
+                        <h2><i class="fa-solid fa-cloud-arrow-up text-indigo"></i> <span id="uiBulkCenterTitle">Centro de Carga Masiva Multiformato</span></h2>
+                    </div>
+
+                    <!-- Datos del Banco Destino -->
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label for="bulkBankNameInput" id="uiLabelTargetBank">Nombre de la Temática / Banco</label>
+                            <input type="text" id="bulkBankNameInput" placeholder="Ej. Matemáticas 6° - Fracciones">
+                        </div>
+                        <div class="form-group">
+                            <label for="bulkOperationMode" id="uiLabelBulkAction">Modo de Carga</label>
+                            <select id="bulkOperationMode">
+                                <option value="create_or_append" id="optBulkAppend">Crear nuevo o añadir al existente</option>
+                                <option value="replace" id="optBulkReplace">Reemplazar preguntas si ya existe</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Pestañas de Formato de Entrada (Excel/CSV, Texto Plano, JSON) -->
+                    <div class="format-tabs">
+                        <button type="button" class="format-tab active" data-fmt="excel" onclick="switchBulkFormatTab('excel')">
+                            <i class="fa-solid fa-table"></i>
+                            <span>1. Excel / CSV</span>
+                        </button>
+                        <button type="button" class="format-tab" data-fmt="text" onclick="switchBulkFormatTab('text')">
+                            <i class="fa-solid fa-align-left"></i>
+                            <span>2. Texto Plano</span>
+                        </button>
+                        <button type="button" class="format-tab" data-fmt="json" onclick="switchBulkFormatTab('json')">
+                            <i class="fa-solid fa-code"></i>
+                            <span>3. JSON</span>
+                        </button>
+                    </div>
+
+                    <!-- ===== GUÍA 1: EXCEL / CSV / TSV ===== -->
+                    <div id="fmtGuideExcel" class="format-guide-box">
+                        <div class="guide-header">
+                            <strong><i class="fa-solid fa-circle-check text-emerald"></i> Cómo cargar desde Excel o Google Sheets:</strong>
+                            <div class="guide-actions">
+                                <button type="button" class="btn-mini" onclick="insertSampleIntoBulk('excel')">
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i> Ver Ejemplo
+                                </button>
+                                <button type="button" class="btn-mini" onclick="downloadTemplateFile('csv')">
+                                    <i class="fa-solid fa-download"></i> Plantilla Excel (.csv)
+                                </button>
+                            </div>
+                        </div>
+                        <p class="guide-text">
+                            Crea una tabla en Excel con <strong>6 o 7 columnas</strong>, selecciona las filas, cópialas (<code>Ctrl+C</code>) y pégalas abajo, o sube tu archivo <code>.csv</code>:
+                        </p>
+                        <div class="schema-chips">
+                            <span>1. Pregunta</span>
+                            <span class="chip-correct">2. Respuesta Correcta</span>
+                            <span>3. Incorrecta 1</span>
+                            <span>4. Incorrecta 2</span>
+                            <span>5. Incorrecta 3</span>
+                            <span>6. Nivel (1 a 5, opc)</span>
+                            <span>7. URL Imagen (opc)</span>
+                        </div>
+                    </div>
+
+                    <!-- ===== GUÍA 2: TEXTO PLANO ===== -->
+                    <div id="fmtGuideText" class="format-guide-box hidden">
+                        <div class="guide-header">
+                            <strong><i class="fa-solid fa-circle-check text-emerald"></i> Cómo cargar en Texto Plano (una pregunta por línea):</strong>
+                            <div class="guide-actions">
+                                <button type="button" class="btn-mini" onclick="insertSampleIntoBulk('text')">
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i> Ver Ejemplo
+                                </button>
+                                <button type="button" class="btn-mini" onclick="downloadTemplateFile('txt')">
+                                    <i class="fa-solid fa-download"></i> Plantilla (.txt)
+                                </button>
+                            </div>
+                        </div>
+                        <p class="guide-text">
+                            Escribe una pregunta por línea separando cada dato con barra <code>|</code>, punto y coma <code>;</code> o dos puntos <code>:</code>. La <strong>primera respuesta</strong> siempre debe ser la correcta (el juego las desordena al jugar):
+                        </p>
+                        <code class="code-sample">Pregunta | Respuesta Correcta | Incorrecta 1 | Incorrecta 2 | Incorrecta 3 | Nivel(1-5) | URL_Imagen(opcional)</code>
+                    </div>
+
+                    <!-- ===== GUÍA 3: JSON (MODERNO O CLÁSICO TECHMATH) ===== -->
+                    <div id="fmtGuideJson" class="format-guide-box hidden">
+                        <div class="guide-header">
+                            <strong><i class="fa-solid fa-circle-check text-emerald"></i> Cómo cargar en formato JSON (Compatible con tu versión anterior):</strong>
+                            <div class="guide-actions">
+                                <button type="button" class="btn-mini" onclick="insertSampleIntoBulk('json')">
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i> Ver Ejemplo
+                                </button>
+                                <button type="button" class="btn-mini" onclick="downloadTemplateFile('json')">
+                                    <i class="fa-solid fa-download"></i> Plantilla (.json)
+                                </button>
+                            </div>
+                        </div>
+                        <p class="guide-text">
+                            Acepta tanto objetos JSON modernos como el arreglo clásico <code>data_</code> de <em>TECHMATH</em>:
+                        </p>
+                        <code class="code-sample">[ ["¿Cuánto es 5x7?", "", "35", "30", "40", "45", 1], ... ]  ó  [ {"question":"...", "correct":"...", "wrong":["..."], "level":1} ]</code>
+                    </div>
+
+                    <!-- Área de Pegado o Subida de Archivo -->
+                    <div class="bulk-input-area">
+                        <textarea id="bulkRawTextarea" rows="7" placeholder="Pega aquí tus preguntas desde Excel, texto plano o JSON..."></textarea>
+
+                        <div class="bulk-Bottom-bar">
+                            <div class="file-upload-group">
+                                <button type="button" class="btn-utility" onclick="document.getElementById('bulkFileInput').click()">
+                                    <i class="fa-solid fa-file-arrow-up text-indigo"></i>
+                                    <span id="uiBtnUploadFile">Subir Archivo (.csv, .txt, .json)</span>
+                                </button>
+                                <input type="file" id="bulkFileInput" accept=".csv,.tsv,.txt,.json" class="hidden" onchange="handleBulkFileUpload(event)">
+                            </div>
+
+                            <button type="button" class="btn-primary-md" onclick="processBulkImport()">
+                                <i class="fa-solid fa-bolt"></i>
+                                <span id="uiBtnProcessBulk">Procesar y Guardar Banco</span>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+        <!-- =====================================================================
+             VISTA 4: RANKING DE PUNTAJES (POR TEMÁTICA, DOCENTE Y GENERAL)
+             ===================================================================== -->
+        <section id="viewRanking" class="view-section">
+            <div class="studio-card">
+                <div class="ranking-header-row">
+                    <div>
+                        <h2><i class="fa-solid fa-ranking-star text-indigo"></i> <span id="uiRankingTitle">Tabla de Posiciones</span></h2>
+                        <p class="text-muted-sm" id="uiRankingSubtitle">Ordenado por mayor puntaje y menor tiempo empleado (desempate automático).</p>
+                    </div>
+
+                    <div class="ranking-filters">
+                        <select id="rankingBankFilter" onchange="renderRankingTable()">
+                            <option value="all">Todas las Temáticas (General)</option>
+                        </select>
+                        <select id="rankingTeacherFilter" onchange="renderRankingTable()">
+                            <option value="all">Todos los Docentes</option>
+                        </select>
+                        <input type="text" id="rankingSearchInput" oninput="renderRankingTable()" placeholder="Buscar jugador...">
+                        <button class="btn-danger-sm" onclick="clearRankingHistory()">
+                            <i class="fa-regular fa-trash-can"></i> <span id="uiBtnClearRanking">Vaciar Historial</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="studio-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th id="thPlayer">Jugador</th>
+                                <th id="thTopic">Temática</th>
+                                <th id="thTeacher">Docente</th>
+                                <th id="thRound">Ronda</th>
+                                <th id="thScore">Puntaje</th>
+                                <th id="thTime">Tiempo</th>
+                                <th id="thDate">Fecha</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rankingTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- =====================================================================
+             VISTA 5: ACERCA DE / INSTRUCCIONES DEL JUEGO
+             ===================================================================== -->
+        <section id="viewAbout" class="view-section">
+            <div class="studio-card about-card">
+                <h2><i class="fa-solid fa-circle-question text-indigo"></i> <span id="uiAboutTitle">¿Cómo funciona UparTrivia Studio?</span></h2>
+                <div class="about-grid">
+                    <div class="about-item">
+                        <div class="about-icon"><i class="fa-solid fa-layer-group"></i></div>
+                        <h4 id="uiAbout1Title">1. 5 Niveles de Dificultad</h4>
+                        <p id="uiAbout1Desc">La partida avanza a través de 5 rondas progresivas (Muy Fácil a Muy Difícil). Al completar todas las preguntas de una ronda, aseguras el puntaje acumulado.</p>
+                    </div>
+                    <div class="about-item">
+                        <div class="about-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                        <h4 id="uiAbout2Title">2. Retirarse vs Arriesgar</h4>
+                        <p id="uiAbout2Desc">Si decides "Plantarte / Retirarte" te llevas el puntaje total que tengas en ese momento. Si respondes mal, solo te llevas el último piso asegurado.</p>
+                    </div>
+                    <div class="about-item">
+                        <div class="about-icon"><i class="fa-solid fa-file-csv"></i></div>
+                        <h4 id="uiAbout3Title">3. Bancos Multiformato y Perfiles</h4>
+                        <p id="uiAbout3Desc">Cada docente puede crear sus temáticas pegando directamente desde Excel, texto separado por barras o archivos JSON, e incluso mezclar varios bancos en una misma partida.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ==================== MODAL GENÉRICO DE CONFIRMACIÓN / RESULTADO ==================== -->
+    <div id="appModalOverlay" class="modal-overlay">
+        <div class="modal-card">
+            <div id="appModalIcon" class="modal-badge-icon">
+                <i class="fa-solid fa-trophy"></i>
+            </div>
+            <h3 id="appModalTitle">Título</h3>
+            <div id="appModalBody" class="modal-body-text"></div>
+            <div id="appModalInputWrapper" class="form-group hidden">
+                <input type="text" id="appModalInput" placeholder="Nombre del docente (ej. Prof. Kevin Florez)">
+            </div>
+            <div class="modal-actions" id="appModalActions"></div>
+        </div>
+    </div>
+
+    <!-- Pie de Página -->
+    <footer class="app-footer">
+        <p><strong>UparTrivia Studio</strong> — Creado por <a href="https://github.com/kevinluisfl" target="_blank">Kevin Luis Flórez Lozada (klfl)</a> 💻</p>
+    </footer>
+
+    <!-- Lógica modular de la aplicación -->
+    <script src="app.js"></script>
+</body>
+
+</html>
