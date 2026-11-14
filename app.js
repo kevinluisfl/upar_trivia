@@ -9,17 +9,20 @@ const STORAGE_KEYS = {
     ACTIVE_TEACHER: 'upartrivia_active_teacher_v1',
     BANKS: 'upartrivia_banks_v1',
     RANKING: 'upartrivia_ranking_v1',
+    ROUND_CONFIG: 'upartrivia_round_config_v1',
     THEME: 'upartrivia_theme',
     LANG: 'upartrivia_lang'
 };
 
-const ROUND_TIERS = [
-    { level: 1, nameEs: 'Muy Fácil', nameEn: 'Very Easy', descEs: 'Muy Fácil (Inicial)', descEn: 'Very Easy (Starter)', points: 500 },
-    { level: 2, nameEs: 'Fácil', nameEn: 'Easy', descEs: 'Fácil (Básico)', descEn: 'Easy (Basic)', points: 1000 },
-    { level: 3, nameEs: 'Intermedia', nameEn: 'Medium', descEs: 'Intermedia', descEn: 'Intermediate', points: 1500 },
-    { level: 4, nameEs: 'Difícil', nameEn: 'Hard', descEs: 'Difícil (Avanzado)', descEn: 'Hard (Advanced)', points: 2500 },
-    { level: 5, nameEs: 'Muy Difícil', nameEn: 'Expert', descEs: 'Muy Difícil (Experto)', descEn: 'Very Hard (Expert)', points: 4500 }
+const DEFAULT_ROUND_TIERS = [
+    { level: 1, nameEs: 'Muy Fácil', nameEn: 'Very Easy', descEs: 'Muy Fácil (Inicial)', descEn: 'Very Easy (Starter)', points: 500, enabled: true },
+    { level: 2, nameEs: 'Fácil', nameEn: 'Easy', descEs: 'Fácil (Básico)', descEn: 'Easy (Basic)', points: 1000, enabled: true },
+    { level: 3, nameEs: 'Intermedia', nameEn: 'Medium', descEs: 'Intermedia', descEn: 'Intermediate', points: 1500, enabled: true },
+    { level: 4, nameEs: 'Difícil', nameEn: 'Hard', descEs: 'Difícil (Avanzado)', descEn: 'Hard (Advanced)', points: 2500, enabled: true },
+    { level: 5, nameEs: 'Muy Difícil', nameEn: 'Expert', descEs: 'Muy Difícil (Experto)', descEn: 'Very Hard (Expert)', points: 4500, enabled: true }
 ];
+
+let ROUND_TIERS = JSON.parse(JSON.stringify(DEFAULT_ROUND_TIERS));
 
 /* --------------------------------------------------------------------------
    0. DICCIONARIO COMPLETO BILINGÜE (ES / EN)
@@ -48,21 +51,26 @@ const I18N = {
         // Lobby / Inicio
         lobbyTitle: 'Nueva Partida',
         labelTeacher: 'Perfil Docente Activo',
-        btnAddTeacher: 'Nuevo Docente',
+        btnAddTeacher: 'Nuevo',
+        btnEditTeacher: 'Editar',
+        btnDeleteTeacher: 'Eliminar',
         labelPlayer: 'Nombre del Jugador o Equipo',
         placeholderPlayer: 'Ej. Sofía Martínez - 601',
         labelTopicSelect: 'Temática de la Trivia',
-        labelMixMode: 'Mezclar varias temáticas',
+        labelShowOtherProfiles: 'Incluir otros perfiles',
+        labelMixMode: 'Mezclar temáticas',
         labelQPerRound: 'Preguntas por Ronda',
-        optQ3: '3 por ronda (15 total - Rápida)',
-        optQ5: '5 por ronda (25 total - Clásica)',
+        optQ3: '3 por ronda (Rápida)',
+        optQ5: '5 por ronda (Clásica)',
         labelAvailablePool: 'Preguntas Disponibles',
         unitQuestions: 'preguntas',
         unitQuestionsShort: 'preg',
         unitRounds: 'Rondas',
         btnStartNow: '¡Comenzar a Jugar Ahora!',
         ladderPreviewTitle: 'Estructura de Rondas y Puntos',
-        ladderPreviewDesc: 'Supera cada ronda para asegurar tu puntaje acumulado. Si te equivocas, conservas los puntos asegurados de la última ronda completada.',
+        btnSavePointsConfig: 'Guardar Puntuación',
+        ladderPreviewDesc: 'Marca qué rondas deseas jugar y personaliza los puntos por pregunta o el puntaje máximo total (al guardar, el ranking se ajusta proporcionalmente).',
+        labelMaxTotalScore: 'Puntaje Máximo Total a Obtener:',
         roundWord: 'Ronda',
         ptsPerQ: 'pts / preg',
         tipTitle: '3 Comodines Incluidos:',
@@ -106,24 +114,25 @@ const I18N = {
         tabFmtExcel: '1. Excel / CSV',
         tabFmtText: '2. Texto Plano',
         tabFmtJson: '3. JSON',
-        btnSeeSample: 'Ver Ejemplo',
+        btnSeeSample: 'Ver Ejemplo (25 preg)',
         btnTemplateCsv: 'Plantilla Excel (.csv)',
         btnTemplateTxt: 'Plantilla (.txt)',
         btnTemplateJson: 'Plantilla (.json)',
+        sepLabelCsv: 'Separador CSV:',
         guideExcelTitle: 'Cómo cargar desde Excel o Google Sheets:',
-        guideExcelDesc: 'Crea una tabla en Excel con <strong>6 o 7 columnas</strong>, selecciona las filas, cópialas (<code>Ctrl+C</code>) y pégalas abajo, o sube tu archivo <code>.csv</code>:',
+        guideExcelDesc: 'Crea una tabla en Excel con <strong>6 o 7 columnas</strong> (mínimo 5 preguntas por nivel), selecciona las filas, cópialas (<code>Ctrl+C</code>) y pégalas abajo, o descarga la plantilla <code>.csv</code> con tu separador preferido:',
         chip1: '1. Pregunta',
         chip2: '2. Respuesta Correcta',
         chip3: '3. Incorrecta 1',
         chip4: '4. Incorrecta 2',
         chip5: '5. Incorrecta 3',
-        chip6: '6. Nivel (1 a 5, opc)',
+        chip6: '6. Nivel (1 a 5)',
         chip7: '7. URL Imagen (opc)',
         guideTextTitle: 'Cómo cargar en Texto Plano (una pregunta por línea):',
-        guideTextDesc: 'Escribe una pregunta por línea separando cada dato con barra <code>|</code>, punto y coma <code>;</code> o dos puntos <code>:</code>. La <strong>primera respuesta</strong> siempre debe ser la correcta (el juego las desordena al jugar):',
+        guideTextDesc: 'Escribe una pregunta por línea separando cada dato con barra <code>|</code>, punto y coma <code>;</code> o dos puntos <code>:</code>. La <strong>primera respuesta</strong> siempre debe ser la correcta:',
         guideTextCode: 'Pregunta | Respuesta Correcta | Incorrecta 1 | Incorrecta 2 | Incorrecta 3 | Nivel(1-5) | URL_Imagen(opcional)',
-        guideJsonTitle: 'Cómo cargar en formato JSON (Compatible con tu versión anterior):',
-        guideJsonDesc: 'Acepta tanto objetos JSON modernos como el arreglo clásico <code>data_</code> de <em>TECHMATH</em>:',
+        guideJsonTitle: 'Cómo cargar en formato JSON (Compatible con exportación de Bancos y TECHMATH):',
+        guideJsonDesc: 'Acepta archivos exportados desde UparTrivia (individuales o completos), objetos JSON modernos o arreglos clásicos:',
         placeholderBulkTextarea: 'Pega aquí tus preguntas desde Excel, texto plano o JSON...',
         btnUploadFile: 'Subir Archivo (.csv, .txt, .json)',
         btnProcessBulk: 'Procesar y Guardar Banco',
@@ -149,7 +158,7 @@ const I18N = {
         // Acerca de / Cómo Jugar
         aboutTitle: '¿Cómo funciona UparTrivia Studio?',
         about1Title: '1. 5 Niveles de Dificultad',
-        about1Desc: 'La partida avanza a través de 5 rondas progresivas (Muy Fácil a Muy Difícil). Al completar todas las preguntas de una ronda, aseguras el puntaje acumulado.',
+        about1Desc: 'La partida avanza a través de las rondas seleccionadas (Muy Fácil a Muy Difícil). Al completar todas las preguntas de una ronda, aseguras el puntaje acumulado.',
         about2Title: '2. Retirarse vs Arriesgar',
         about2Desc: 'Si decides "Plantarte / Retirarte" te llevas el puntaje total que tengas en ese momento. Si respondes mal, solo te llevas el último piso asegurado.',
         about3Title: '3. Bancos Multiformato y Perfiles',
@@ -160,22 +169,38 @@ const I18N = {
         toastFinishCurrentGame: 'Termina o retírate de la partida actual primero',
         modalNewTeacherTitle: 'Nuevo Perfil Docente',
         modalNewTeacherBody: 'Ingresa el nombre del docente para organizar sus propios bancos de preguntas y rankings:',
+        modalEditTeacherTitle: 'Editar Perfil Docente',
+        modalEditTeacherBody: 'Modifica el nombre del perfil docente activo (se actualizarán sus bancos y registros):',
+        modalDeleteTeacherTitle: 'Eliminar Perfil Docente',
+        modalDeleteTeacherWithBanks: (name, count) => `El perfil <strong>${name}</strong> tiene <strong>${count} banco(s) de preguntas</strong>. ¿Deseas transferir sus trivias al perfil seleccionado abajo o eliminarlas también?`,
+        modalDeleteTeacherEmpty: (name) => `¿Estás seguro de eliminar el perfil docente <strong>${name}</strong>?`,
+        btnTransferAndDelete: 'Transferir Trivias y Eliminar',
+        btnDeleteAllTeacher: 'Eliminar Perfil y sus Trivias',
+        toastMustKeepOneTeacher: 'Debes conservar al menos un perfil docente activo.',
+        toastTeacherUpdated: 'Perfil docente actualizado',
+        toastTeacherDeleted: 'Perfil docente eliminado',
         placeholderTeacherModal: 'Nombre del docente (ej. Prof. Kevin Florez)',
         btnCancel: 'Cancelar',
         btnCreateProfile: 'Crear Perfil',
+        btnSaveChanges: 'Guardar Cambios',
         toastProfileActivated: 'Perfil activado:',
-        toastSampleInserted: 'Ejemplo insertado. Haz clic en "Procesar y Guardar Banco" para probarlo.',
+        toastSampleInserted: 'Ejemplo de 25 preguntas (5 por nivel) insertado.',
         toastFileLoaded: 'Archivo cargado en el editor:',
         toastNoValidQuestions: 'No se detectaron preguntas válidas. Revisa el formato guía.',
         toastBankSavedPre: 'preguntas guardadas en',
-        toastKeepOneBank: 'Debes conservar al menos un banco de preguntas activo.',
+        toastBanksBundleImported: 'bancos importados correctamente desde el paquete JSON',
         toastBankDeleted: 'Banco eliminado',
+        toastLastBankResetDefault: 'Se eliminó el último banco; se cargó la plantilla por defecto de Cultura General (25 preguntas).',
         toastDefaultsRestored: 'Plantillas oficiales restauradas',
         toastEnterPlayerName: 'Por favor escribe el nombre del jugador o equipo para iniciar',
         toastSelectOneTopic: 'Selecciona al menos una temática para jugar',
-        toastMin5Questions: 'El banco seleccionado necesita al menos 5 preguntas.',
+        toastSelectAtLeastOneRound: 'Debes seleccionar al menos una ronda activa para jugar.',
+        toastInsufficientLevelQuestions: (lvl, needed, found) => `La Ronda ${lvl} requiere mínimo ${needed} preguntas de nivel ${lvl} (solo hay ${found} en el banco seleccionado).`,
+        toastPointsSavedAndScaled: 'Configuración de rondas y puntos guardada (Ranking actualizado).',
+        toastPointsRestored: 'Puntos y rondas restaurados a los valores por defecto.',
         toastRoundClearedPre: 'superada! Aseguras',
         toastQuestionSwapped: 'Pregunta cambiada por otra del mismo nivel',
+        toastNoMoreSwapQuestions: 'No hay más preguntas adicionales en este nivel para cambiar.',
         modalRetireTitle: '¿Deseas plantarte y retirarte?',
         modalRetireBody: (score, sec) => `Si te retiras ahora, asegurarás tu puntaje actual de <strong>${score} puntos</strong> en un tiempo de <strong>${sec}s</strong>.`,
         btnKeepPlaying: 'Seguir Jugando',
@@ -183,7 +208,7 @@ const I18N = {
         modalVictoryTitle: (p) => `¡Felicidades ${p}, eres Sabio Millonario! 🏆`,
         modalRetiredTitle: (p) => `¡Buen retiro estratégico, ${p}! 🤝`,
         modalWrongTitle: (p) => `Fin de la partida, ${p}`,
-        modalVictoryDesc: (s, t) => `Respondiste todas las rondas correctamente.<br>Puntaje Final: <strong>${s} pts</strong> en <strong>${t}s</strong>.`,
+        modalVictoryDesc: (s, t) => `Respondiste todas las rondas seleccionadas correctamente.<br>Puntaje Final: <strong>${s} pts</strong> en <strong>${t}s</strong>.`,
         modalRetiredDesc: (s, t) => `Te retiraste a tiempo conservando tu puntaje actual:<br><strong>${s} pts</strong> en <strong>${t}s</strong>.`,
         modalWrongDesc: (s, t) => `Te llevas el puntaje asegurado de tu última ronda completada:<br><strong>${s} pts</strong> (${t}s).`,
         btnGoHome: 'Ir al Inicio',
@@ -192,7 +217,7 @@ const I18N = {
         modalClearRankBody: 'Se eliminarán todos los registros de la tabla de posiciones.',
         btnConfirmClearRank: 'Sí, Borrar Todo',
         toastRankingCleared: 'Historial de puntajes vaciado',
-        sampleBankDefaultName: 'Ciencias y Tecnología - Ejemplo',
+        sampleBankDefaultName: 'Cultura General y Ciencias (25 Preg)',
         importedBankDefaultName: 'Banco Importado'
     },
     en: {
@@ -218,21 +243,26 @@ const I18N = {
         // Lobby / Home
         lobbyTitle: 'New Game Setup',
         labelTeacher: 'Active Teacher Profile',
-        btnAddTeacher: 'New Teacher',
+        btnAddTeacher: 'New',
+        btnEditTeacher: 'Edit',
+        btnDeleteTeacher: 'Delete',
         labelPlayer: 'Player or Team Name',
         placeholderPlayer: 'E.g. Sofia Martinez - Grade 601',
         labelTopicSelect: 'Trivia Topic',
-        labelMixMode: 'Mix multiple topics',
+        labelShowOtherProfiles: 'Include other profiles',
+        labelMixMode: 'Mix topics',
         labelQPerRound: 'Questions per Round',
-        optQ3: '3 per round (15 total - Quick)',
-        optQ5: '5 per round (25 total - Classic)',
+        optQ3: '3 per round (Quick)',
+        optQ5: '5 per round (Classic)',
         labelAvailablePool: 'Available Questions',
         unitQuestions: 'questions',
         unitQuestionsShort: 'q',
         unitRounds: 'Rounds',
         btnStartNow: 'Start Playing Now!',
         ladderPreviewTitle: 'Round & Point Structure',
-        ladderPreviewDesc: 'Complete each round to lock in your safe score. If you miss a question, you keep the guaranteed points from the last completed round.',
+        btnSavePointsConfig: 'Save Scoring',
+        ladderPreviewDesc: 'Check which rounds to play and customize points per question or max total score (saving automatically scales the leaderboard).',
+        labelMaxTotalScore: 'Max Total Score to Achieve:',
         roundWord: 'Round',
         ptsPerQ: 'pts / q',
         tipTitle: '3 Lifelines Included:',
@@ -276,24 +306,25 @@ const I18N = {
         tabFmtExcel: '1. Excel / CSV',
         tabFmtText: '2. Plain Text',
         tabFmtJson: '3. JSON',
-        btnSeeSample: 'Insert Example',
+        btnSeeSample: 'See Sample (25 q)',
         btnTemplateCsv: 'Excel Template (.csv)',
         btnTemplateTxt: 'Template (.txt)',
         btnTemplateJson: 'Template (.json)',
+        sepLabelCsv: 'CSV Delimiter:',
         guideExcelTitle: 'How to load from Excel or Google Sheets:',
-        guideExcelDesc: 'Create a table in Excel with <strong>6 or 7 columns</strong>, select the rows, copy them (<code>Ctrl+C</code>) and paste below, or upload a <code>.csv</code> file:',
+        guideExcelDesc: 'Create a table in Excel with <strong>6 or 7 columns</strong> (at least 5 questions per level), copy the rows (<code>Ctrl+C</code>) and paste below, or download the <code>.csv</code> template with your preferred delimiter:',
         chip1: '1. Question',
         chip2: '2. Correct Answer',
         chip3: '3. Wrong 1',
         chip4: '4. Wrong 2',
         chip5: '5. Wrong 3',
-        chip6: '6. Level (1 to 5, opt)',
+        chip6: '6. Level (1 to 5)',
         chip7: '7. Image URL (opt)',
         guideTextTitle: 'How to load from Plain Text (one question per line):',
-        guideTextDesc: 'Write one question per line separating fields with a pipe <code>|</code>, semicolon <code>;</code> or colon <code>:</code>. The <strong>first answer</strong> must always be the correct one (the game shuffles them automatically):',
+        guideTextDesc: 'Write one question per line separating fields with a pipe <code>|</code>, semicolon <code>;</code> or colon <code>:</code>. The <strong>first answer</strong> must always be the correct one:',
         guideTextCode: 'Question | Correct Answer | Wrong 1 | Wrong 2 | Wrong 3 | Level(1-5) | Image_URL(optional)',
-        guideJsonTitle: 'How to load in JSON format (Compatible with legacy TECHMATH):',
-        guideJsonDesc: 'Accepts both modern JSON objects and the classic <code>data_</code> array from <em>TECHMATH</em>:',
+        guideJsonTitle: 'How to load in JSON format (Compatible with exported banks & TECHMATH):',
+        guideJsonDesc: 'Accepts single or full JSON files exported from UparTrivia, modern JSON objects, or classic arrays:',
         placeholderBulkTextarea: 'Paste your questions here from Excel, plain text, or JSON...',
         btnUploadFile: 'Upload File (.csv, .txt, .json)',
         btnProcessBulk: 'Process & Save Bank',
@@ -319,7 +350,7 @@ const I18N = {
         // About / How to Play
         aboutTitle: 'How does UparTrivia Studio work?',
         about1Title: '1. 5 Difficulty Tiers',
-        about1Desc: 'The game progresses through 5 rounds (Very Easy to Expert). Completing all questions in a round locks in your guaranteed safe score.',
+        about1Desc: 'The game progresses through the selected rounds (Very Easy to Expert). Completing all questions in a round locks in your guaranteed safe score.',
         about2Title: '2. Walk Away vs Risk It',
         about2Desc: 'If you choose to "Walk Away", you keep 100% of your current score. If you answer incorrectly, you only take home your last guaranteed safe score.',
         about3Title: '3. Multi-Format Banks & Teacher Profiles',
@@ -330,22 +361,38 @@ const I18N = {
         toastFinishCurrentGame: 'Finish or walk away from the current game first',
         modalNewTeacherTitle: 'New Teacher Profile',
         modalNewTeacherBody: 'Enter the teacher\'s name to organize their own question banks and leaderboards:',
+        modalEditTeacherTitle: 'Edit Teacher Profile',
+        modalEditTeacherBody: 'Update the active teacher profile name (associated banks and scores will be updated):',
+        modalDeleteTeacherTitle: 'Delete Teacher Profile',
+        modalDeleteTeacherWithBanks: (name, count) => `Profile <strong>${name}</strong> owns <strong>${count} question bank(s)</strong>. Do you want to transfer them to the profile selected below or delete them as well?`,
+        modalDeleteTeacherEmpty: (name) => `Are you sure you want to delete teacher profile <strong>${name}</strong>?`,
+        btnTransferAndDelete: 'Transfer Banks & Delete',
+        btnDeleteAllTeacher: 'Delete Profile & Banks',
+        toastMustKeepOneTeacher: 'You must keep at least one active teacher profile.',
+        toastTeacherUpdated: 'Teacher profile updated',
+        toastTeacherDeleted: 'Teacher profile deleted',
         placeholderTeacherModal: 'Teacher name (e.g. Prof. Kevin Florez)',
         btnCancel: 'Cancel',
         btnCreateProfile: 'Create Profile',
+        btnSaveChanges: 'Save Changes',
         toastProfileActivated: 'Profile activated:',
-        toastSampleInserted: 'Sample inserted. Click "Process & Save Bank" to test it.',
+        toastSampleInserted: '25-question sample (5 per level) inserted.',
         toastFileLoaded: 'File loaded into editor:',
         toastNoValidQuestions: 'No valid questions detected. Check the format guide.',
         toastBankSavedPre: 'questions saved in',
-        toastKeepOneBank: 'You must keep at least one active question bank.',
+        toastBanksBundleImported: 'banks imported successfully from JSON bundle',
         toastBankDeleted: 'Bank deleted',
+        toastLastBankResetDefault: 'Last bank deleted; default General Knowledge template (25 questions) restored.',
         toastDefaultsRestored: 'Official templates restored',
         toastEnterPlayerName: 'Please enter the player or team name to start',
         toastSelectOneTopic: 'Select at least one topic to play',
-        toastMin5Questions: 'The selected bank needs at least 5 questions.',
+        toastSelectAtLeastOneRound: 'You must select at least one active round to play.',
+        toastInsufficientLevelQuestions: (lvl, needed, found) => `Round ${lvl} requires at least ${needed} level-${lvl} questions (only ${found} found in selected bank).`,
+        toastPointsSavedAndScaled: 'Round and scoring configuration saved (Leaderboard scaled).',
+        toastPointsRestored: 'Scoring and rounds restored to default values.',
         toastRoundClearedPre: 'cleared! Safe score locked at',
         toastQuestionSwapped: 'Question swapped for another of the same level',
+        toastNoMoreSwapQuestions: 'No additional questions available in this level to swap.',
         modalRetireTitle: 'Walk away with your current points?',
         modalRetireBody: (score, sec) => `If you walk away now, you will lock in your current score of <strong>${score} points</strong> with a time of <strong>${sec}s</strong>.`,
         btnKeepPlaying: 'Keep Playing',
@@ -353,7 +400,7 @@ const I18N = {
         modalVictoryTitle: (p) => `Congratulations ${p}, you are a Millionaire Scholar! 🏆`,
         modalRetiredTitle: (p) => `Smart strategic walk-away, ${p}! 🤝`,
         modalWrongTitle: (p) => `Game Over, ${p}`,
-        modalVictoryDesc: (s, t) => `You answered all rounds correctly!<br>Final Score: <strong>${s} pts</strong> in <strong>${t}s</strong>.`,
+        modalVictoryDesc: (s, t) => `You answered all selected rounds correctly!<br>Final Score: <strong>${s} pts</strong> in <strong>${t}s</strong>.`,
         modalRetiredDesc: (s, t) => `You walked away in time keeping your current score:<br><strong>${s} pts</strong> in <strong>${t}s</strong>.`,
         modalWrongDesc: (s, t) => `You take home the guaranteed safe score from your last completed round:<br><strong>${s} pts</strong> (${t}s).`,
         btnGoHome: 'Back to Home',
@@ -362,7 +409,7 @@ const I18N = {
         modalClearRankBody: 'All score records in the leaderboard will be permanently removed.',
         btnConfirmClearRank: 'Yes, Clear All',
         toastRankingCleared: 'Leaderboard history cleared',
-        sampleBankDefaultName: 'Science & Tech - Sample',
+        sampleBankDefaultName: 'General Knowledge & Science (25 Q)',
         importedBankDefaultName: 'Imported Bank'
     }
 };
@@ -372,16 +419,56 @@ function t(key) {
 }
 
 /* --------------------------------------------------------------------------
-   1. BANCOS PREDEFINIDOS (MATEMÁTICAS TECHMATH Y CULTURA GENERAL DEPURADOS)
+   1. BANCOS PREDEFINIDOS Y PLANTILLA DE 25 PREGUNTAS (5 POR CADA NIVEL)
    -------------------------------------------------------------------------- */
+const SAMPLE_25_QUESTIONS = [
+    // Nivel 1 (5 preguntas)
+    { id: 'cg1', question: '¿Cuál es el animal nacional representativo de Australia?', correct: 'Canguro', wrong: ['Koala', 'León', 'Cóndor'], level: 1, url: '' },
+    { id: 'cg2', question: '¿Cuántos días tarda aproximadamente la Tierra en dar una vuelta al Sol?', correct: '365 días', wrong: ['30 días', '180 días', '400 días'], level: 1, url: '' },
+    { id: 'cg3', question: '¿Qué país sudamericano se ubica en la frontera entre Perú y Colombia?', correct: 'Ecuador', wrong: ['Paraguay', 'Chile', 'Uruguay'], level: 1, url: '' },
+    { id: 'cg4', question: '¿Cuál es la montaña más alta del planeta Tierra sobre el nivel del mar?', correct: 'Monte Everest', wrong: ['Monte Fuji', 'Aconcagua', 'Kilimanjaro'], level: 1, url: '' },
+    { id: 'cg5', question: '¿Qué parte del cuerpo humano percibe los sabores de los alimentos?', correct: 'La lengua', wrong: ['El olfato', 'El paladar óseo', 'La laringe'], level: 1, url: '' },
+    // Nivel 2 (5 preguntas)
+    { id: 'cg6', question: '¿Cuál es el estado soberano más pequeño del mundo?', correct: 'Ciudad del Vaticano', wrong: ['Mónaco', 'San Marino', 'Chipre'], level: 2, url: '' },
+    { id: 'cg7', question: '¿Cuál es la capital de Canadá?', correct: 'Ottawa', wrong: ['Toronto', 'Montreal', 'Vancouver'], level: 2, url: '' },
+    { id: 'cg8', question: '¿Cuántos jugadores en cancha tiene un equipo de voleibol?', correct: '6 jugadores', wrong: ['5 jugadores', '7 jugadores', '11 jugadores'], level: 2, url: '' },
+    { id: 'cg9', question: '¿Quién fue el primer presidente de los Estados Unidos?', correct: 'George Washington', wrong: ['Abraham Lincoln', 'Thomas Jefferson', 'John Adams'], level: 2, url: '' },
+    { id: 'cg10', question: '¿Cuál fue el primer largometraje animado de Disney (1937)?', correct: 'Blancanieves y los siete enanitos', wrong: ['Pinocho', 'El Rey León', 'Bambi'], level: 2, url: '' },
+    // Nivel 3 (5 preguntas)
+    { id: 'cg11', question: '¿Qué misión espacial llevó al primer ser humano a la Luna en 1969?', correct: 'Apolo 11', wrong: ['Sputnik 1', 'Apolo 13', 'Voyager 1'], level: 3, url: '' },
+    { id: 'cg12', question: '¿En qué país sudamericano se encuentra el cerro Aconcagua?', correct: 'Argentina', wrong: ['Chile', 'Perú', 'Bolivia'], level: 3, url: '' },
+    { id: 'cg13', question: '¿Qué científico formuló la Teoría de la Relatividad?', correct: 'Albert Einstein', wrong: ['Isaac Newton', 'Nikola Tesla', 'Galileo Galilei'], level: 3, url: '' },
+    { id: 'cg14', question: '¿Qué instrumento se utiliza para medir la presión atmosférica?', correct: 'Barómetro', wrong: ['Anemómetro', 'Termómetro', 'Higrómetro'], level: 3, url: '' },
+    { id: 'cg15', question: '¿Quién dio la primera voz oficial a Mickey Mouse?', correct: 'Walt Disney', wrong: ['Roy Disney', 'Mel Blanc', 'Ub Iwerks'], level: 3, url: '' },
+    // Nivel 4 (5 preguntas)
+    { id: 'cg16', question: '¿Qué artista renacentista pintó la bóveda de la Capilla Sixtina?', correct: 'Miguel Ángel', wrong: ['Leonardo da Vinci', 'Rafael Sanzio', 'Sandro Botticelli'], level: 4, url: '' },
+    { id: 'cg17', question: '¿Cuántas teclas tiene un piano estándar moderno?', correct: '88 teclas', wrong: ['64 teclas', '76 teclas', '92 teclas'], level: 4, url: '' },
+    { id: 'cg18', question: '¿En qué año se disolvió oficialmente la Unión Soviética?', correct: '1991', wrong: ['1989', '1985', '1995'], level: 4, url: '' },
+    { id: 'cg19', question: '¿Qué prefijo en los apellidos escoceses significa literalmente "hijo de"?', correct: 'Mac', wrong: ['Van', 'Fitz', 'O\''], level: 4, url: '' },
+    { id: 'cg20', question: '¿Cuál de los cinco sentidos humanos se desarrolla primero en el útero?', correct: 'El tacto / olfato temprano', wrong: ['La vista', 'El gusto adulto', 'El equilibrio'], level: 4, url: '' },
+    // Nivel 5 (5 preguntas)
+    { id: 'cg21', question: '¿Cuál es la pintura más célebre del expresionista noruego Edvard Munch?', correct: 'El grito', wrong: ['La noche estrellada', 'Guernica', 'La persistencia de la memoria'], level: 5, url: '' },
+    { id: 'cg22', question: '¿Quién es considerado el creador de la World Wide Web (WWW)?', correct: 'Tim Berners-Lee', wrong: ['Bill Gates', 'Steve Jobs', 'Linus Torvalds'], level: 5, url: '' },
+    { id: 'cg23', question: '¿Cuál fue el primer país del mundo en aprobar el sufragio femenino (1893)?', correct: 'Nueva Zelanda', wrong: ['Suiza', 'Estados Unidos', 'Reino Unido'], level: 5, url: '' },
+    { id: 'cg24', question: '¿Cuál es la capital de Indonesia?', correct: 'Yakarta', wrong: ['Kuala Lumpur', 'Manila', 'Bangkok'], level: 5, url: '' },
+    { id: 'cg25', question: '¿Qué país africano fue fundado en 1847 por esclavos estadounidenses liberados?', correct: 'Liberia', wrong: ['Ghana', 'Senegal', 'Etiopía'], level: 5, url: '' }
+];
+
 const DEFAULT_BANKS = [
+    {
+        id: 'bank_general_default',
+        title: 'Cultura General y Ciencias',
+        teacher: 'Prof. Kevin Flórez',
+        createdAt: '2026-10-15',
+        questions: JSON.parse(JSON.stringify(SAMPLE_25_QUESTIONS))
+    },
     {
         id: 'bank_math_default',
         title: 'Matemáticas y Lógica (TECHMATH)',
         teacher: 'Prof. Kevin Flórez',
         createdAt: '2026-10-15',
         questions: [
-            // Nivel 1
+            // Nivel 1 (7 preguntas)
             { id: 'm1', question: '¿Cuánto es 5 × 7?', correct: '35', wrong: ['30', '40', '45'], level: 1, url: '' },
             { id: 'm2', question: '¿Cuánto es 72 ÷ 8?', correct: '9', wrong: ['7', '8', '10'], level: 1, url: '' },
             { id: 'm3', question: '¿Cuál es el valor de 3² (tres al cuadrado)?', correct: '9', wrong: ['3', '6', '12'], level: 1, url: '' },
@@ -389,67 +476,34 @@ const DEFAULT_BANKS = [
             { id: 'm5', question: '¿Cuál es la suma de los ángulos internos de un triángulo?', correct: '180°', wrong: ['90°', '120°', '360°'], level: 1, url: '' },
             { id: 'm6', question: 'Si tienes 2 docenas de huevos, ¿cuántos huevos tienes en total?', correct: '24', wrong: ['12', '36', '48'], level: 1, url: '' },
             { id: 'm7', question: '¿Cuánto es 3/4 de 40?', correct: '30', wrong: ['25', '35', '40'], level: 1, url: '' },
-            // Nivel 2
+            // Nivel 2 (6 preguntas)
             { id: 'm8', question: '¿Cuál es el valor numérico de 3x + 2 si x = 4?', correct: '14', wrong: ['10', '12', '16'], level: 2, url: '' },
             { id: 'm9', question: 'Si un rectángulo tiene base de 8 cm y altura de 6 cm, ¿cuál es su perímetro?', correct: '28 cm', wrong: ['24 cm', '30 cm', '48 cm'], level: 2, url: '' },
             { id: 'm10', question: 'Un tren viaja a 60 km/h. ¿Cuántos kilómetros recorrerá en 3 horas y media?', correct: '210 km', wrong: ['180 km', '200 km', '220 km'], level: 2, url: '' },
             { id: 'm11', question: '¿Cuál es la representación decimal de 3/5?', correct: '0.6', wrong: ['0.4', '0.5', '0.7'], level: 2, url: '' },
             { id: 'm12', question: 'Si un ángulo mide 70°, ¿cuánto mide su suplemento?', correct: '110°', wrong: ['100°', '20°', '130°'], level: 2, url: '' },
             { id: 'm13', question: 'Un agricultor cosecha 600 kg de café. Si vende el 75%, ¿cuántos kg vende?', correct: '450 kg', wrong: ['400 kg', '500 kg', '550 kg'], level: 2, url: '' },
-            // Nivel 3
+            // Nivel 3 (6 preguntas)
             { id: 'm14', question: 'Un cuadrado tiene un área de 144 cm². ¿Cuánto mide su perímetro?', correct: '48 cm', wrong: ['36 cm', '12 cm', '52 cm'], level: 3, url: '' },
             { id: 'm15', question: 'Un prisma rectangular tiene base de 10 cm × 8 cm y altura de 5 cm. ¿Cuál es su volumen?', correct: '400 cm³', wrong: ['350 cm³', '450 cm³', '500 cm³'], level: 3, url: '' },
             { id: 'm16', question: 'Un comerciante vende un producto en $6,000 con descuento del 20%. ¿Cuánto paga el cliente?', correct: '$4,800', wrong: ['$4,200', '$4,500', '$5,000'], level: 3, url: '' },
             { id: 'm17', question: 'En una fábrica trabajan 120 empleados y 2/3 son operarios. ¿Cuántos operarios hay?', correct: '80', wrong: ['60', '70', '90'], level: 3, url: '' },
             { id: 'm18', question: '¿Cuánto es el resultado de la operación 5 + 3 × (7 - 2)?', correct: '20', wrong: ['40', '35', '18'], level: 3, url: '' },
             { id: 'm19', question: '¿Cuál es el número primo que le sigue inmediatamente al 7?', correct: '11', wrong: ['9', '13', '10'], level: 3, url: '' },
-            // Nivel 4
+            // Nivel 4 (6 preguntas)
             { id: 'm20', question: 'Un trapecio tiene bases de 10 cm y 6 cm, y altura de 4 cm. ¿Cuál es su área?', correct: '32 cm²', wrong: ['24 cm²', '28 cm²', '36 cm²'], level: 4, url: '' },
             { id: 'm21', question: 'En un triángulo rectángulo, los catetos miden 9 cm y 12 cm. ¿Cuál es la hipotenusa?', correct: '15 cm', wrong: ['14 cm', '16 cm', '17 cm'], level: 4, url: '' },
             { id: 'm22', question: 'Un cubo tiene un volumen de 125 cm³. ¿Cuánto mide su arista?', correct: '5 cm', wrong: ['4 cm', '6 cm', '25 cm'], level: 4, url: '' },
             { id: 'm23', question: '¿Cuántas aristas tiene un octaedro regular?', correct: '12', wrong: ['8', '24', '6'], level: 4, url: '' },
             { id: 'm24', question: '¿Qué matemático griego escribió la obra "Elementos de Geometría"?', correct: 'Euclides', wrong: ['Arquímedes', 'Pitágoras', 'Tales de Mileto'], level: 4, url: '' },
             { id: 'm25', question: '¿Cuántos segundos hay en 2 horas y media?', correct: '9000', wrong: ['7200', '8000', '9500'], level: 4, url: '' },
-            // Nivel 5
+            // Nivel 5 (6 preguntas)
             { id: 'm26', question: 'Cinco personas se reúnen y cada una abraza a las demás una vez. ¿Cuántos abrazos se dieron?', correct: '10 abrazos', wrong: ['25 abrazos', '5 abrazos', '20 abrazos'], level: 5, url: '' },
             { id: 'm27', question: '¿Cuánto mide la diagonal de un cuadrado cuyos lados miden 6 cm?', correct: '6√2 cm', wrong: ['6 cm', '12 cm', '9√2 cm'], level: 5, url: '' },
             { id: 'm28', question: 'Un rectángulo tiene el largo igual al doble del ancho y su área es 98 cm². ¿Cuáles son sus lados?', correct: '7 cm × 14 cm', wrong: ['8 cm × 16 cm', '6 cm × 12 cm', '9 cm × 18 cm'], level: 5, url: '' },
             { id: 'm29', question: '¿Cuál es la fórmula para hallar el volumen de una esfera de radio r?', correct: '(4/3)πr³', wrong: ['(3/4)πr³', '4πr²', '(1/3)πr³'], level: 5, url: '' },
             { id: 'm30', question: '¿Quién inventó el cálculo infinitesimal de forma independiente a Newton y creó el sistema binario?', correct: 'Gottfried Leibniz', wrong: ['René Descartes', 'Johannes Kepler', 'Leonhard Euler'], level: 5, url: '' },
             { id: 'm31', question: 'Si una persona camina 5 km en una hora, ¿cuánto tardará en recorrer 12 km al mismo ritmo?', correct: '2.4 horas', wrong: ['2.2 horas', '2.5 horas', '2.6 horas'], level: 5, url: '' }
-        ]
-    },
-    {
-        id: 'bank_general_default',
-        title: 'Cultura General y Ciencias',
-        teacher: 'Prof. Kevin Flórez',
-        createdAt: '2026-10-15',
-        questions: [
-            { id: 'g1', question: '¿Cuál es el animal nacional representativo de Australia?', correct: 'Canguro', wrong: ['Koala', 'León', 'Cóndor'], level: 1, url: '' },
-            { id: 'g2', question: '¿Cuántos días tarda aproximadamente la Tierra en dar una vuelta al Sol?', correct: '365 días', wrong: ['30 días', '180 días', '400 días'], level: 1, url: '' },
-            { id: 'g3', question: '¿Qué país sudamericano se ubica en la frontera entre Perú y Colombia?', correct: 'Ecuador', wrong: ['Paraguay', 'Chile', 'Uruguay'], level: 1, url: '' },
-            { id: 'g4', question: '¿Cuál es la montaña más alta del planeta Tierra sobre el nivel del mar?', correct: 'Monte Everest', wrong: ['Monte Fuji', 'Aconcagua', 'Kilimanjaro'], level: 1, url: '' },
-            { id: 'g5', question: '¿Qué parte del cuerpo humano percibe los sabores de los alimentos?', correct: 'La lengua', wrong: ['El olfato', 'El paladar óseo', 'La laringe'], level: 1, url: '' },
-            { id: 'g6', question: '¿Cuál es el estado soberano más pequeño del mundo?', correct: 'Ciudad del Vaticano', wrong: ['Mónaco', 'San Marino', 'Chipre'], level: 2, url: '' },
-            { id: 'g7', question: '¿Cuál es la capital de Canadá?', correct: 'Ottawa', wrong: ['Toronto', 'Montreal', 'Vancouver'], level: 2, url: '' },
-            { id: 'g8', question: '¿Cuántos jugadores en cancha tiene un equipo de voleibol?', correct: '6 jugadores', wrong: ['5 jugadores', '7 jugadores', '11 jugadores'], level: 2, url: '' },
-            { id: 'g9', question: '¿Quién fue el primer presidente de los Estados Unidos?', correct: 'George Washington', wrong: ['Abraham Lincoln', 'Thomas Jefferson', 'John Adams'], level: 2, url: '' },
-            { id: 'g10', question: '¿Cuál fue el primer largometraje animado de Disney (1937)?', correct: 'Blancanieves y los siete enanitos', wrong: ['Pinocho', 'El Rey León', 'Bambi'], level: 2, url: '' },
-            { id: 'g11', question: '¿Qué misión espacial llevó al primer ser humano a la Luna en 1969?', correct: 'Apolo 11', wrong: ['Sputnik 1', 'Apolo 13', 'Voyager 1'], level: 3, url: '' },
-            { id: 'g12', question: '¿En qué país sudamericano se encuentra el cerro Aconcagua?', correct: 'Argentina', wrong: ['Chile', 'Perú', 'Bolivia'], level: 3, url: '' },
-            { id: 'g13', question: '¿Qué científico formuló la Teoría de la Relatividad?', correct: 'Albert Einstein', wrong: ['Isaac Newton', 'Nikola Tesla', 'Galileo Galilei'], level: 3, url: '' },
-            { id: 'g14', question: '¿Qué instrumento se utiliza para medir la presión atmosférica?', correct: 'Barómetro', wrong: ['Anemómetro', 'Termómetro', 'Higrómetro'], level: 3, url: '' },
-            { id: 'g15', question: '¿Quién dio la primera voz oficial a Mickey Mouse?', correct: 'Walt Disney', wrong: ['Roy Disney', 'Mel Blanc', 'Ub Iwerks'], level: 3, url: '' },
-            { id: 'g16', question: '¿Qué artista renacentista pintó la bóveda de la Capilla Sixtina?', correct: 'Miguel Ángel', wrong: ['Leonardo da Vinci', 'Rafael Sanzio', 'Sandro Botticelli'], level: 4, url: '' },
-            { id: 'g17', question: '¿Cuántas teclas tiene un piano estándar moderno?', correct: '88 teclas', wrong: ['64 teclas', '76 teclas', '92 teclas'], level: 4, url: '' },
-            { id: 'g18', question: '¿En qué año se disolvió oficialmente la Unión Soviética?', correct: '1991', wrong: ['1989', '1985', '1995'], level: 4, url: '' },
-            { id: 'g19', question: '¿Qué prefijo en los apellidos escoceses significa literalmente "hijo de"?', correct: 'Mac', wrong: ['Van', 'Fitz', 'O\''], level: 4, url: '' },
-            { id: 'g20', question: '¿Cuál de los cinco sentidos humanos se desarrolla primero en el útero?', correct: 'El tacto / olfato temprano', wrong: ['La vista', 'El gusto adulto', 'El equilibrio'], level: 4, url: '' },
-            { id: 'g21', question: '¿Cuál es la pintura más célebre del expresionista noruego Edvard Munch?', correct: 'El grito', wrong: ['La noche estrellada', 'Guernica', 'La persistencia de la memoria'], level: 5, url: '' },
-            { id: 'g22', question: '¿Quién es considerado el creador de la World Wide Web (WWW)?', correct: 'Tim Berners-Lee', wrong: ['Bill Gates', 'Steve Jobs', 'Linus Torvalds'], level: 5, url: '' },
-            { id: 'g23', question: '¿Cuál fue el primer país del mundo en aprobar el sufragio femenino (1893)?', correct: 'Nueva Zelanda', wrong: ['Suiza', 'Estados Unidos', 'Reino Unido'], level: 5, url: '' },
-            { id: 'g24', question: '¿Cuál es la capital de Indonesia?', correct: 'Yakarta', wrong: ['Kuala Lumpur', 'Manila', 'Bangkok'], level: 5, url: '' },
-            { id: 'g25', question: '¿Qué país africano fue fundado en 1847 por esclavos estadounidenses liberados?', correct: 'Liberia', wrong: ['Ghana', 'Senegal', 'Etiopía'], level: 5, url: '' }
         ]
     }
 ];
@@ -465,6 +519,8 @@ let appState = {
     banks: [],
     ranking: [],
     bulkFormatTab: 'excel',
+    csvTemplateSep: ';',
+    savedMaxScoreReference: 50000,
     audio: {
         rate: 1.0,
         voiceURI: 'default',
@@ -477,6 +533,8 @@ let appState = {
         topicLabel: '',
         teacherName: '',
         questionsPerRound: 5,
+        activeRoundLevels: [1, 2, 3, 4, 5],
+        currentRoundIdx: 0,
         currentRound: 1,
         questionInRound: 1,
         score: 0,
@@ -606,10 +664,10 @@ function showToast(msg, icon = 'fa-circle-check') {
     div.className = 'toast-item';
     div.innerHTML = `<i class="fa-solid ${icon} text-indigo"></i><span>${msg}</span>`;
     container.appendChild(div);
-    setTimeout(() => div.remove(), 3200);
+    setTimeout(() => div.remove(), 3500);
 }
 
-function showAppModal({ icon = 'fa-trophy', title, bodyHtml, showInput = false, buttons = [] }) {
+function showAppModal({ icon = 'fa-trophy', title, bodyHtml, showInput = false, defaultInputVal = '', selectOptions = null, buttons = [] }) {
     const overlay = document.getElementById('appModalOverlay');
     document.getElementById('appModalIcon').innerHTML = `<i class="fa-solid ${icon}"></i>`;
     document.getElementById('appModalTitle').textContent = title;
@@ -620,9 +678,18 @@ function showAppModal({ icon = 'fa-trophy', title, bodyHtml, showInput = false, 
     if (showInput) {
         inputWrap.classList.remove('hidden');
         inputEl.placeholder = t('placeholderTeacherModal');
-        inputEl.value = '';
+        inputEl.value = defaultInputVal || '';
     } else {
         inputWrap.classList.add('hidden');
+    }
+
+    const selectWrap = document.getElementById('appModalSelectWrapper');
+    const selectEl = document.getElementById('appModalSelect');
+    if (Array.isArray(selectOptions) && selectOptions.length > 0) {
+        selectWrap.classList.remove('hidden');
+        selectEl.innerHTML = selectOptions.map(o => `<option value="${o.value}">${o.label}</option>`).join('');
+    } else {
+        selectWrap.classList.add('hidden');
     }
 
     const actionsEl = document.getElementById('appModalActions');
@@ -633,8 +700,9 @@ function showAppModal({ icon = 'fa-trophy', title, bodyHtml, showInput = false, 
         b.innerHTML = btn.label;
         b.onclick = () => {
             const val = inputEl.value.trim();
+            const selVal = selectEl.value;
             overlay.classList.remove('active');
-            if (btn.onClick) btn.onClick(val);
+            if (btn.onClick) btn.onClick(val, selVal);
         };
         actionsEl.appendChild(b);
     });
@@ -696,10 +764,175 @@ function setTextIfPresent(id, text) {
     if (el) el.textContent = text;
 }
 
+/* --------------------------------------------------------------------------
+   5. ESTRUCTURA EDITABLE DE RONDAS Y PUNTOS + REESCALADO DEL RANKING
+   -------------------------------------------------------------------------- */
+function getQuestionsPerRoundVal() {
+    return parseInt(document.getElementById('questionsPerRoundSelect')?.value, 10) || 5;
+}
+
+function computeCurrentMaxScore(qPerRound = getQuestionsPerRoundVal()) {
+    return ROUND_TIERS
+        .filter(tier => tier.enabled)
+        .reduce((sum, tier) => sum + (tier.points * qPerRound), 0);
+}
+
+function renderEditableLadderList() {
+    const container = document.getElementById('editableLadderList');
+    if (!container) return;
+
+    const orderedDesc = [...ROUND_TIERS].sort((a, b) => b.level - a.level);
+
+    container.innerHTML = orderedDesc.map(tier => {
+        const disabledCls = tier.enabled ? '' : 'tier-disabled';
+        const descName = appState.lang === 'en' ? tier.descEn : tier.descEs;
+        return `
+            <div class="ladder-tier tier-${tier.level} ${disabledCls}">
+                <label class="tier-left-check">
+                    <input type="checkbox" ${tier.enabled ? 'checked' : ''} onchange="toggleRoundTierEnabled(${tier.level}, this.checked)">
+                    <span class="tier-badge">${t('roundWord')} ${tier.level}</span>
+                    <span class="tier-name">${descName}</span>
+                </label>
+                <div class="tier-right-input">
+                    <span class="tier-unit-label">+</span>
+                    <input type="number" min="1" step="1" value="${tier.points}" class="font-mono" oninput="handleSingleTierPointInput(${tier.level}, this.value)">
+                    <span class="tier-unit-label">${t('ptsPerQ')}</span>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    const maxInput = document.getElementById('maxTotalScoreInput');
+    if (maxInput) {
+        maxInput.min = ROUND_TIERS.filter(r => r.enabled).length * getQuestionsPerRoundVal();
+        maxInput.step = 1;
+        maxInput.value = computeCurrentMaxScore();
+    }
+}
+
+function toggleRoundTierEnabled(level, isChecked) {
+    const tier = ROUND_TIERS.find(r => r.level === level);
+    if (!tier) return;
+
+    const enabledCount = ROUND_TIERS.filter(r => r.enabled).length;
+    if (!isChecked && enabledCount <= 1) {
+        showToast(t('toastSelectAtLeastOneRound'), 'fa-triangle-exclamation');
+        renderEditableLadderList();
+        return;
+    }
+
+    tier.enabled = isChecked;
+    renderEditableLadderList();
+    updateLobbySummary();
+}
+
+function handleSingleTierPointInput(level, rawVal) {
+    const parsed = parseInt(rawVal, 10);
+    const val = isNaN(parsed) ? 1 : Math.max(1, parsed);
+    const tier = ROUND_TIERS.find(r => r.level === level);
+    if (tier) {
+        tier.points = val;
+    }
+    const maxInput = document.getElementById('maxTotalScoreInput');
+    if (maxInput) {
+        maxInput.value = computeCurrentMaxScore();
+    }
+}
+
+function handleMaxTotalScoreInput(rawMax) {
+    const qPerR = getQuestionsPerRoundVal();
+    const activeTiers = [...ROUND_TIERS].filter(r => r.enabled).sort((a, b) => a.level - b.level);
+    if (activeTiers.length === 0) return;
+
+    // Mínimo absoluto posible: 1 punto por pregunta en cada ronda activa (ej. 25 en clásico, 15 en rápido)
+    const minPossibleTotal = activeTiers.length * qPerR;
+    const parsed = parseInt(rawMax, 10);
+    if (isNaN(parsed) || parsed < minPossibleTotal) return;
+
+    // Total de puntos por pregunta a repartir entre las rondas activas (ej. 100 / 5 = 20 pts/preg)
+    let targetSumPerQ = Math.max(activeTiers.length, Math.round(parsed / qPerR));
+
+    // Usar la curva progresiva original (500, 1000, 1500, 2500, 4500) si todas las rondas estaban iguales,
+    // para que nunca les ponga el mismo valor salvo que el docente las edite manualmente
+    const allEqual = activeTiers.every(r => r.points === activeTiers[0].points);
+    const baseWeights = activeTiers.map(tier => {
+        if (allEqual) {
+            const def = DEFAULT_ROUND_TIERS.find(d => d.level === tier.level);
+            return def ? def.points : tier.level;
+        }
+        return Math.max(1, tier.points);
+    });
+
+    const weightSum = baseWeights.reduce((a, b) => a + b, 0);
+
+    // Reparto entero exacto respetando mínimo 1 pt por pregunta y manteniendo progresión
+    let distributed = activeTiers.map((_, idx) =>
+        Math.max(1, Math.floor((targetSumPerQ * baseWeights[idx]) / weightSum))
+    );
+
+    // Ajustar el residuo exacto para que la suma multiplicada por qPerR coincida con el máximo pedido
+    let diff = targetSumPerQ - distributed.reduce((a, b) => a + b, 0);
+    let cursor = distributed.length - 1;
+    while (diff > 0) {
+        distributed[cursor]++;
+        diff--;
+        cursor = cursor > 0 ? cursor - 1 : distributed.length - 1;
+    }
+    cursor = 0;
+    while (diff < 0) {
+        if (distributed[cursor] > 1) {
+            distributed[cursor]--;
+            diff++;
+        }
+        cursor = (cursor + 1) % distributed.length;
+        if (distributed.every(v => v <= 1)) break;
+    }
+
+    activeTiers.forEach((tier, idx) => {
+        tier.points = distributed[idx];
+        const rowInput = document.querySelector(`.ladder-tier.tier-${tier.level} .tier-right-input input`);
+        if (rowInput) rowInput.value = tier.points;
+    });
+}
+
+function handleQPerRoundChange() {
+    renderEditableLadderList();
+    updateLobbySummary();
+}
+
+function savePointsAndRoundsConfig() {
+    const newMax = computeCurrentMaxScore(5);
+    const oldMax = appState.savedMaxScoreReference || 50000;
+
+    if (oldMax > 0 && newMax > 0 && oldMax !== newMax && appState.ranking.length > 0) {
+        const ratio = newMax / oldMax;
+        appState.ranking.forEach(entry => {
+            entry.score = Math.max(1, Math.round(entry.score * ratio));
+        });
+        saveRankingToStorage();
+    }
+
+    appState.savedMaxScoreReference = newMax;
+    localStorage.setItem(STORAGE_KEYS.ROUND_CONFIG, JSON.stringify({
+        tiers: ROUND_TIERS,
+        referenceMax5: newMax
+    }));
+
+    renderRankingTable();
+    updateLobbySummary();
+    showToast(t('toastPointsSavedAndScaled'), 'fa-sliders');
+}
+
+function resetPointsAndRoundsDefault() {
+    ROUND_TIERS = JSON.parse(JSON.stringify(DEFAULT_ROUND_TIERS));
+    savePointsAndRoundsConfig();
+    renderEditableLadderList();
+    showToast(t('toastPointsRestored'), 'fa-rotate-left');
+}
+
 function applyTranslations() {
     setTextIfPresent('langLabel', appState.lang.toUpperCase());
 
-    // Cabecera y Navegación
     setTextIfPresent('uiBadgeEdition', t('badgeEdition'));
     setTextIfPresent('uiMainSubtitle', t('mainSubtitle'));
     setTextIfPresent('uiNavPlay', t('navPlay'));
@@ -708,7 +941,6 @@ function applyTranslations() {
     setTextIfPresent('uiNavAbout', t('navAbout'));
     setTextIfPresent('uiBtnSettings', t('btnSettings'));
 
-    // Menú desplegable de Audio y Voz
     setTextIfPresent('uiSettingsTitle', t('settingsTitle'));
     setTextIfPresent('uiBtnTestVoice', t('btnTestVoice'));
     setTextIfPresent('uiLabelVoiceRate', t('labelVoiceRate'));
@@ -720,14 +952,16 @@ function applyTranslations() {
     setTextIfPresent('uiLabelSfx', t('labelSfx'));
     loadVoices();
 
-    // Vista 1: Lobby / Inicio
     setTextIfPresent('uiLobbyTitle', t('lobbyTitle'));
     setTextIfPresent('uiLabelTeacher', t('labelTeacher'));
     setTextIfPresent('uiBtnAddTeacher', t('btnAddTeacher'));
+    setTextIfPresent('uiBtnEditTeacher', t('btnEditTeacher'));
+    setTextIfPresent('uiBtnDeleteTeacher', t('btnDeleteTeacher'));
     setTextIfPresent('uiLabelPlayer', t('labelPlayer'));
     const playerInput = document.getElementById('playerNameInput');
     if (playerInput) playerInput.placeholder = t('placeholderPlayer');
     setTextIfPresent('uiLabelTopicSelect', t('labelTopicSelect'));
+    setTextIfPresent('uiLabelShowOtherProfiles', t('labelShowOtherProfiles'));
     setTextIfPresent('uiLabelMixMode', t('labelMixMode'));
     setTextIfPresent('uiLabelQPerRound', t('labelQPerRound'));
 
@@ -740,25 +974,15 @@ function applyTranslations() {
     setTextIfPresent('uiLabelAvailablePool', t('labelAvailablePool'));
     setTextIfPresent('uiBtnStartNow', t('btnStartNow'));
     setTextIfPresent('uiLadderPreviewTitle', t('ladderPreviewTitle'));
+    setTextIfPresent('uiBtnSavePointsConfig', t('btnSavePointsConfig'));
     setTextIfPresent('uiLadderPreviewDesc', t('ladderPreviewDesc'));
+    setTextIfPresent('uiLabelMaxTotalScore', t('labelMaxTotalScore'));
 
-    // Escalera previa del Lobby (Niveles 1 a 5)
-    ROUND_TIERS.forEach(tier => {
-        const tierBox = document.querySelector(`.ladder-tier.tier-${tier.level}`);
-        if (tierBox) {
-            const badge = tierBox.querySelector('.tier-badge');
-            const name = tierBox.querySelector('.tier-name');
-            const pts = tierBox.querySelector('.tier-points');
-            if (badge) badge.textContent = `${t('roundWord')} ${tier.level}`;
-            if (name) name.textContent = appState.lang === 'en' ? tier.descEn : tier.descEs;
-            if (pts) pts.textContent = `+${tier.points.toLocaleString()} ${t('ptsPerQ')}`;
-        }
-    });
+    renderEditableLadderList();
 
     setTextIfPresent('uiTipTitle', t('tipTitle'));
     setTextIfPresent('uiTipDesc', t('tipDesc'));
 
-    // Vista 2: Juego en Vivo
     setTextIfPresent('uiHudPlayer', t('hudPlayer'));
     setTextIfPresent('uiHudRound', t('hudRound'));
     setTextIfPresent('uiHudScore', t('hudScore'));
@@ -780,13 +1004,12 @@ function applyTranslations() {
 
     if (appState.game.active && appState.game.currentQuestion) {
         const g = appState.game;
-        const tierInfo = ROUND_TIERS[g.currentRound - 1];
+        const tierInfo = ROUND_TIERS.find(r => r.level === g.currentRound) || ROUND_TIERS[0];
         setTextIfPresent('gameCategoryBadge', `${g.currentQuestion.sourceTopic || g.topicLabel} • +${tierInfo.points} pts`);
         setTextIfPresent('gameQuestionCounter', `${t('questionWord')} ${g.questionInRound} ${t('ofWord')} ${g.questionsPerRound} (${t('roundWord')} ${g.currentRound})`);
         renderLiveLadder();
     }
 
-    // Vista 3: Bancos y Centro de Carga Masiva Multiformato
     setTextIfPresent('uiMyBanksTitle', t('myBanksTitle'));
     const bankSearch = document.getElementById('bankSearchInput');
     if (bankSearch) bankSearch.placeholder = t('placeholderSearchBank');
@@ -800,7 +1023,6 @@ function applyTranslations() {
     setTextIfPresent('optBulkAppend', t('optBulkAppend'));
     setTextIfPresent('optBulkReplace', t('optBulkReplace'));
 
-    // Pestañas de formato (Excel, Texto Plano, JSON)
     const tabExcel = document.querySelector('.format-tab[data-fmt="excel"] span');
     const tabText = document.querySelector('.format-tab[data-fmt="text"] span');
     const tabJson = document.querySelector('.format-tab[data-fmt="json"] span');
@@ -808,7 +1030,7 @@ function applyTranslations() {
     if (tabText) tabText.textContent = t('tabFmtText');
     if (tabJson) tabJson.textContent = t('tabFmtJson');
 
-    // Guías de formato (Excel, Texto, JSON)
+    // Guía 1: Excel / CSV con selector de separador antes de descargar
     const guideExcel = document.getElementById('fmtGuideExcel');
     if (guideExcel) {
         guideExcel.innerHTML = `
@@ -818,6 +1040,12 @@ function applyTranslations() {
                     <button type="button" class="btn-mini" onclick="insertSampleIntoBulk('excel')">
                         <i class="fa-solid fa-wand-magic-sparkles"></i> ${t('btnSeeSample')}
                     </button>
+                    <select id="csvTemplateSepSelect" class="mini-sep-select" onchange="appState.csvTemplateSep = this.value" title="${t('sepLabelCsv')}">
+                        <option value=";" ${appState.csvTemplateSep === ';' ? 'selected' : ''}>CSV: ";" (Excel ES)</option>
+                        <option value="," ${appState.csvTemplateSep === ',' ? 'selected' : ''}>CSV: "," (Estándar)</option>
+                        <option value="|" ${appState.csvTemplateSep === '|' ? 'selected' : ''}>CSV: "|"</option>
+                        <option value="tab" ${appState.csvTemplateSep === 'tab' ? 'selected' : ''}>TSV: Tab</option>
+                    </select>
                     <button type="button" class="btn-mini" onclick="downloadTemplateFile('csv')">
                         <i class="fa-solid fa-download"></i> ${t('btnTemplateCsv')}
                     </button>
@@ -870,7 +1098,7 @@ function applyTranslations() {
                 </div>
             </div>
             <p class="guide-text">${t('guideJsonDesc')}</p>
-            <code class="code-sample">[ ["¿Cuánto es 5x7?", "", "35", "30", "40", "45", 1], ... ]  /  [ {"question":"...", "correct":"...", "wrong":["..."], "level":1} ]</code>
+            <code class="code-sample">[ {"question":"...", "correct":"...", "wrong":["..."], "level":1}, ... ]</code>
         `;
     }
 
@@ -879,7 +1107,6 @@ function applyTranslations() {
     setTextIfPresent('uiBtnUploadFile', t('btnUploadFile'));
     setTextIfPresent('uiBtnProcessBulk', t('btnProcessBulk'));
 
-    // Vista 4: Ranking
     setTextIfPresent('uiRankingTitle', t('rankingTitle'));
     setTextIfPresent('uiRankingSubtitle', t('rankingSubtitle'));
     const rankSearch = document.getElementById('rankingSearchInput');
@@ -893,7 +1120,6 @@ function applyTranslations() {
     setTextIfPresent('thTime', t('thTime'));
     setTextIfPresent('thDate', t('thDate'));
 
-    // Vista 5: Cómo Jugar / Acerca de
     setTextIfPresent('uiAboutTitle', t('aboutTitle'));
     setTextIfPresent('uiAbout1Title', t('about1Title'));
     setTextIfPresent('uiAbout1Desc', t('about1Desc'));
@@ -913,7 +1139,7 @@ function applyTranslations() {
 }
 
 /* --------------------------------------------------------------------------
-   5. PERSISTENCIA DE PERFILES DOCENTES, BANCOS Y RANKING
+   6. PERSISTENCIA Y GESTIÓN DE PERFILES DOCENTES (CREAR, EDITAR, ELIMINAR)
    -------------------------------------------------------------------------- */
 function loadInitialStorage() {
     let savedTeachers = null;
@@ -926,6 +1152,22 @@ function loadInitialStorage() {
         : ['Prof. Kevin Flórez', 'Docente Invitado'];
 
     appState.activeTeacher = localStorage.getItem(STORAGE_KEYS.ACTIVE_TEACHER) || appState.teachers[0];
+    if (!appState.teachers.includes(appState.activeTeacher)) {
+        appState.activeTeacher = appState.teachers[0];
+    }
+
+    let savedRoundCfg = null;
+    try {
+        savedRoundCfg = JSON.parse(localStorage.getItem(STORAGE_KEYS.ROUND_CONFIG) || 'null');
+    } catch (e) { savedRoundCfg = null; }
+
+    if (savedRoundCfg && Array.isArray(savedRoundCfg.tiers) && savedRoundCfg.tiers.length === 5) {
+        ROUND_TIERS = savedRoundCfg.tiers;
+        appState.savedMaxScoreReference = savedRoundCfg.referenceMax5 || computeCurrentMaxScore(5);
+    } else {
+        ROUND_TIERS = JSON.parse(JSON.stringify(DEFAULT_ROUND_TIERS));
+        appState.savedMaxScoreReference = computeCurrentMaxScore(5);
+    }
 
     let savedBanks = null;
     try {
@@ -980,7 +1222,7 @@ function saveRankingToStorage() {
 
 function openNewTeacherModal() {
     showAppModal({
-        icon: 'fa-user-tie',
+        icon: 'fa-user-plus',
         title: t('modalNewTeacherTitle'),
         bodyHtml: t('modalNewTeacherBody'),
         showInput: true,
@@ -997,6 +1239,7 @@ function openNewTeacherModal() {
                     appState.activeTeacher = name;
                     saveTeachersToStorage();
                     updateLobbySelectors();
+                    renderBanksList();
                     showToast(`${t('toastProfileActivated')} "${name}"`);
                 }
             }
@@ -1004,10 +1247,127 @@ function openNewTeacherModal() {
     });
 }
 
+function openEditTeacherModal() {
+    const oldName = appState.activeTeacher;
+    showAppModal({
+        icon: 'fa-user-pen',
+        title: t('modalEditTeacherTitle'),
+        bodyHtml: t('modalEditTeacherBody'),
+        showInput: true,
+        defaultInputVal: oldName,
+        buttons: [
+            { label: t('btnCancel'), className: 'btn-utility' },
+            {
+                label: t('btnSaveChanges'),
+                className: 'btn-primary-md',
+                onClick: (newName) => {
+                    if (!newName || newName === oldName) return;
+                    const idx = appState.teachers.indexOf(oldName);
+                    if (idx !== -1) {
+                        appState.teachers[idx] = newName;
+                    }
+                    appState.activeTeacher = newName;
+                    // Actualizar bancos y ranking asociados a este perfil
+                    appState.banks.forEach(b => {
+                        if (b.teacher === oldName) b.teacher = newName;
+                    });
+                    appState.ranking.forEach(r => {
+                        if (r.teacher === oldName) r.teacher = newName;
+                    });
+                    saveTeachersToStorage();
+                    saveBanksToStorage();
+                    saveRankingToStorage();
+                    updateLobbySelectors();
+                    renderBanksList();
+                    renderRankingTable();
+                    showToast(`${t('toastTeacherUpdated')}: "${newName}"`);
+                }
+            }
+        ]
+    });
+}
+
+function openDeleteTeacherModal() {
+    if (appState.teachers.length <= 1) {
+        showToast(t('toastMustKeepOneTeacher'), 'fa-triangle-exclamation');
+        return;
+    }
+
+    const teacherToDelete = appState.activeTeacher;
+    const otherTeachers = appState.teachers.filter(tc => tc !== teacherToDelete);
+    const ownedBanks = appState.banks.filter(b => b.teacher === teacherToDelete);
+
+    if (ownedBanks.length > 0) {
+        showAppModal({
+            icon: 'fa-user-xmark',
+            title: t('modalDeleteTeacherTitle'),
+            bodyHtml: t('modalDeleteTeacherWithBanks')(teacherToDelete, ownedBanks.length),
+            selectOptions: otherTeachers.map(tc => ({ value: tc, label: `Transferir a: ${tc}` })),
+            buttons: [
+                { label: t('btnCancel'), className: 'btn-utility' },
+                {
+                    label: t('btnTransferAndDelete'),
+                    className: 'btn-primary-md',
+                    onClick: (_, targetTeacher) => {
+                        const dest = targetTeacher || otherTeachers[0];
+                        appState.banks.forEach(b => {
+                            if (b.teacher === teacherToDelete) b.teacher = dest;
+                        });
+                        appState.teachers = otherTeachers;
+                        appState.activeTeacher = dest;
+                        saveTeachersToStorage();
+                        saveBanksToStorage();
+                        updateLobbySelectors();
+                        renderBanksList();
+                        showToast(t('toastTeacherDeleted'));
+                    }
+                },
+                {
+                    label: t('btnDeleteAllTeacher'),
+                    className: 'btn-danger-sm',
+                    onClick: () => {
+                        appState.banks = appState.banks.filter(b => b.teacher !== teacherToDelete);
+                        appState.teachers = otherTeachers;
+                        appState.activeTeacher = otherTeachers[0];
+                        ensureAtLeastDefaultBank();
+                        saveTeachersToStorage();
+                        saveBanksToStorage();
+                        updateLobbySelectors();
+                        renderBanksList();
+                        showToast(t('toastTeacherDeleted'));
+                    }
+                }
+            ]
+        });
+    } else {
+        showAppModal({
+            icon: 'fa-user-xmark',
+            title: t('modalDeleteTeacherTitle'),
+            bodyHtml: t('modalDeleteTeacherEmpty')(teacherToDelete),
+            buttons: [
+                { label: t('btnCancel'), className: 'btn-utility' },
+                {
+                    label: t('btnDeleteTeacher'),
+                    className: 'btn-danger-sm',
+                    onClick: () => {
+                        appState.teachers = otherTeachers;
+                        appState.activeTeacher = otherTeachers[0];
+                        saveTeachersToStorage();
+                        updateLobbySelectors();
+                        renderBanksList();
+                        showToast(t('toastTeacherDeleted'));
+                    }
+                }
+            ]
+        });
+    }
+}
+
 function handleTeacherChange(val) {
     appState.activeTeacher = val;
     saveTeachersToStorage();
     updateLobbySelectors();
+    renderBanksList();
 }
 
 function updateLobbySelectors() {
@@ -1020,27 +1380,33 @@ function updateLobbySelectors() {
 
     const bankSel = document.getElementById('activeBankSelect');
     const multiBox = document.getElementById('multiTopicWrapper');
+    const includeOthers = document.getElementById('showAllProfilesBanksToggle')?.checked || false;
 
-    const sortedBanks = [...appState.banks].sort((a, b) => {
-        if (a.teacher === appState.activeTeacher && b.teacher !== appState.activeTeacher) return -1;
-        if (a.teacher !== appState.activeTeacher && b.teacher === appState.activeTeacher) return 1;
-        return a.title.localeCompare(b.title);
-    });
+    // Filtrar por docente activo salvo que marque "Incluir otros perfiles"
+    const visibleBanks = includeOthers
+        ? [...appState.banks]
+        : appState.banks.filter(b => b.teacher === appState.activeTeacher);
 
     const prevBankId = bankSel.value;
-    bankSel.innerHTML = sortedBanks.map(b =>
-        `<option value="${b.id}" ${b.id === prevBankId ? 'selected' : ''}>${b.title} (${b.questions.length} ${t('unitQuestionsShort')} • ${b.teacher})</option>`
-    ).join('');
 
-    multiBox.innerHTML = sortedBanks.map(b => `
-        <label class="multi-topic-item">
-            <span>
-                <input type="checkbox" class="mix-bank-check" value="${b.id}" checked onchange="updateLobbySummary()">
-                ${b.title}
-            </span>
-            <span class="badge-soft">${b.questions.length} ${t('unitQuestionsShort')}</span>
-        </label>
-    `).join('');
+    if (visibleBanks.length === 0) {
+        bankSel.innerHTML = `<option value="">-- Sin trivias en este perfil (Activa "Incluir otros perfiles" o crea una) --</option>`;
+        multiBox.innerHTML = `<p class="text-muted-sm" style="margin:0;">No hay trivias en este perfil.</p>`;
+    } else {
+        bankSel.innerHTML = visibleBanks.map(b =>
+            `<option value="${b.id}" ${b.id === prevBankId ? 'selected' : ''}>${b.title} (${b.questions.length} ${t('unitQuestionsShort')} • ${b.teacher})</option>`
+        ).join('');
+
+        multiBox.innerHTML = visibleBanks.map(b => `
+            <label class="multi-topic-item">
+                <span>
+                    <input type="checkbox" class="mix-bank-check" value="${b.id}" checked onchange="updateLobbySummary()">
+                    ${b.title} <small style="color:var(--text-muted);">(${b.teacher})</small>
+                </span>
+                <span class="badge-soft">${b.questions.length} ${t('unitQuestionsShort')}</span>
+            </label>
+        `).join('');
+    }
 
     updateLobbySummary();
 }
@@ -1058,7 +1424,7 @@ function getSelectedBanksForGame() {
     if (!isMix) {
         const id = document.getElementById('activeBankSelect')?.value;
         const found = appState.banks.find(b => b.id === id);
-        return found ? [found] : (appState.banks[0] ? [appState.banks[0]] : []);
+        return found ? [found] : [];
     } else {
         const checkedIds = Array.from(document.querySelectorAll('.mix-bank-check:checked')).map(c => c.value);
         return appState.banks.filter(b => checkedIds.includes(b.id));
@@ -1068,15 +1434,17 @@ function getSelectedBanksForGame() {
 function updateLobbySummary() {
     const selected = getSelectedBanksForGame();
     const totalQ = selected.reduce((acc, b) => acc + b.questions.length, 0);
-    const qPerRound = parseInt(document.getElementById('questionsPerRoundSelect')?.value, 10) || 5;
+    const qPerRound = getQuestionsPerRoundVal();
+    const activeRoundsCount = ROUND_TIERS.filter(r => r.enabled).length;
+
     const poolEl = document.getElementById('lobbyPoolCount');
     const badgeEl = document.getElementById('uiLobbyRoundsBadge');
     if (poolEl) poolEl.textContent = `${totalQ} ${t('unitQuestions')}`;
-    if (badgeEl) badgeEl.textContent = `5 ${t('unitRounds')} • ${qPerRound * 5} ${t('unitQuestions')}`;
+    if (badgeEl) badgeEl.textContent = `${activeRoundsCount} ${t('unitRounds')} • ${qPerRound * activeRoundsCount} ${t('unitQuestions')}`;
 }
 
 /* --------------------------------------------------------------------------
-   6. CENTRO DE CARGA MASIVA MULTIFORMATO (EXCEL/CSV, TEXTO PLANO Y JSON)
+   7. CENTRO DE CARGA MASIVA MULTIFORMATO (EXCEL/CSV CON SEPARADOR, TEXTO Y JSON)
    -------------------------------------------------------------------------- */
 function switchBulkFormatTab(fmt) {
     appState.bulkFormatTab = fmt;
@@ -1096,32 +1464,15 @@ function insertSampleIntoBulk(fmt) {
     }
 
     if (fmt === 'excel') {
-        textarea.value = [
-            "¿Cuál es el planeta más grande del Sistema Solar?\tJúpiter\tMarte\tSaturno\tVenus\t1",
-            "¿Qué molécula transporta la información genética?\tADN\tATP\tGlucosa\tInsulina\t2",
-            "¿Qué unidad mide la resistencia eléctrica?\tOhmio\tVoltio\tAmperio\tVatio\t3",
-            "¿En qué orgánulo celular ocurre la respiración celular?\tMitocondria\tRibosoma\tLisosoma\tAparato de Golgi\t4",
-            "¿Qué ley física establece que F = m · a?\tSegunda Ley de Newton\tLey de Hooke\tLey de Ohm\tPrincipio de Pascal\t5"
-        ].join('\n');
+        textarea.value = SAMPLE_25_QUESTIONS.map(q =>
+            `${q.question}\t${q.correct}\t${q.wrong[0]}\t${q.wrong[1]}\t${q.wrong[2]}\t${q.level}`
+        ).join('\n');
     } else if (fmt === 'text') {
-        textarea.value = [
-            "¿Cuál es el planeta más grande del Sistema Solar? | Júpiter | Marte | Saturno | Venus | 1",
-            "¿Qué molécula transporta la información genética? | ADN | ATP | Glucosa | Insulina | 2",
-            "¿Qué unidad mide la resistencia eléctrica? | Ohmio | Voltio | Amperio | Vatio | 3",
-            "¿En qué orgánulo celular ocurre la respiración celular? | Mitocondria | Ribosoma | Lisosoma | Golgi | 4",
-            "¿Qué ley física establece que F = m · a? | Segunda Ley de Newton | Ley de Hooke | Ley de Ohm | Pascal | 5"
-        ].join('\n');
+        textarea.value = SAMPLE_25_QUESTIONS.map(q =>
+            `${q.question} | ${q.correct} | ${q.wrong[0]} | ${q.wrong[1]} | ${q.wrong[2]} | ${q.level}`
+        ).join('\n');
     } else if (fmt === 'json') {
-        textarea.value = JSON.stringify([
-            ["¿Cuál es el planeta más grande del Sistema Solar?", "", "Júpiter", "Marte", "Saturno", "Venus", 1],
-            {
-                question: "¿Qué molécula transporta la información genética?",
-                correct: "ADN",
-                wrong: ["ATP", "Glucosa", "Insulina"],
-                level: 2,
-                url: ""
-            }
-        ], null, 2);
+        textarea.value = JSON.stringify(SAMPLE_25_QUESTIONS, null, 2);
     }
     showToast(t('toastSampleInserted'));
 }
@@ -1132,31 +1483,30 @@ function downloadTemplateFile(type) {
     let mime = 'text/plain;charset=utf-8';
 
     if (type === 'csv') {
-        content = [
-            "Pregunta,Respuesta_Correcta,Incorrecta_1,Incorrecta_2,Incorrecta_3,Nivel_1_a_5,URL_Imagen_Opcional",
-            "\"¿Cuánto es 8 x 9?\",\"72\",\"64\",\"81\",\"70\",1,\"\"",
-            "\"¿Capital de Colombia?\",\"Bogotá\",\"Medellín\",\"Cali\",\"Barranquilla\",1,\"\""
-        ].join('\n');
-        filename = 'plantilla_upartrivia_excel.csv';
+        const rawSep = document.getElementById('csvTemplateSepSelect')?.value || appState.csvTemplateSep || ';';
+        const sep = rawSep === 'tab' ? '\t' : rawSep;
+        const headers = ['Pregunta', 'Respuesta_Correcta', 'Incorrecta_1', 'Incorrecta_2', 'Incorrecta_3', 'Nivel_1_a_5', 'URL_Imagen_Opcional'];
+        const rows = SAMPLE_25_QUESTIONS.map(q => [
+            `"${q.question.replace(/"/g, '""')}"`,
+            `"${q.correct.replace(/"/g, '""')}"`,
+            `"${q.wrong[0].replace(/"/g, '""')}"`,
+            `"${q.wrong[1].replace(/"/g, '""')}"`,
+            `"${q.wrong[2].replace(/"/g, '""')}"`,
+            q.level,
+            `""`
+        ].join(sep));
+        content = '\uFEFF' + [headers.join(sep), ...rows].join('\n');
+        filename = 'plantilla_upartrivia_25_preguntas.csv';
         mime = 'text/csv;charset=utf-8';
     } else if (type === 'txt') {
         content = [
-            "# Una pregunta por línea: Pregunta | Correcta | Incorrecta 1 | Incorrecta 2 | Incorrecta 3 | Nivel(1-5)",
-            "¿Cuánto es 8 x 9? | 72 | 64 | 81 | 70 | 1",
-            "¿Capital de Colombia? | Bogotá | Medellín | Cali | Barranquilla | 1"
+            "# 25 Preguntas (5 por cada nivel del 1 al 5): Pregunta | Correcta | Incorrecta 1 | Incorrecta 2 | Incorrecta 3 | Nivel(1-5)",
+            ...SAMPLE_25_QUESTIONS.map(q => `${q.question} | ${q.correct} | ${q.wrong[0]} | ${q.wrong[1]} | ${q.wrong[2]} | ${q.level}`)
         ].join('\n');
-        filename = 'plantilla_upartrivia_texto.txt';
+        filename = 'plantilla_upartrivia_25_preguntas.txt';
     } else {
-        content = JSON.stringify([
-            {
-                question: "¿Cuánto es 8 x 9?",
-                correct: "72",
-                wrong: ["64", "81", "70"],
-                level: 1,
-                url: ""
-            }
-        ], null, 2);
-        filename = 'plantilla_upartrivia.json';
+        content = JSON.stringify(SAMPLE_25_QUESTIONS, null, 2);
+        filename = 'plantilla_upartrivia_25_preguntas.json';
         mime = 'application/json';
     }
 
@@ -1188,15 +1538,61 @@ function handleBulkFileUpload(event) {
     reader.readAsText(file);
 }
 
-function parseUniversalQuestions(rawText) {
-    const trimmed = rawText.trim();
-    if (!trimmed) return [];
+/**
+ * Divide una fila CSV respetando comillas dobles para cualquier separador (, ; |)
+ */
+function splitCSVLine(line, delimiter) {
+    const result = [];
+    let current = '';
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+        const ch = line[i];
+        if (ch === '"') {
+            if (inQuotes && line[i + 1] === '"') {
+                current += '"';
+                i++;
+            } else {
+                inQuotes = !inQuotes;
+            }
+        } else if (ch === delimiter && !inQuotes) {
+            result.push(current.trim());
+            current = '';
+        } else {
+            current += ch;
+        }
+    }
+    result.push(current.trim());
+    return result;
+}
 
-    // 1. Intentar como JSON si empieza por [ o {
+/**
+ * Analizador Universal Multiformato:
+ * Soporta:
+ * 1. JSON de respaldo completo ("Exportar Todo") -> [{ title, teacher, questions: [...] }, ...]
+ * 2. JSON de un banco individual -> { title, questions: [...] } o arreglo directo de preguntas
+ * 3. Arreglo clásico TECHMATH data_
+ * 4. Excel TSV / CSV (con , ; |) / Texto Plano
+ */
+function parseUniversalQuestions(rawText) {
+    const trimmed = rawText.trim().replace(/^\uFEFF/, '');
+    if (!trimmed) return { questions: [], importedBanksBundle: null };
+
     if (trimmed.startsWith('[') || trimmed.startsWith('{')) {
         try {
             const parsed = JSON.parse(trimmed);
-            const list = Array.isArray(parsed) ? parsed : (parsed.questions || []);
+
+            // Caso A: Es un paquete de múltiples bancos exportado con "Exportar Todo (JSON)"
+            if (Array.isArray(parsed) && parsed.length > 0 && parsed[0] && Array.isArray(parsed[0].questions)) {
+                return { questions: [], importedBanksBundle: parsed };
+            }
+
+            // Caso B: Es un objeto con propiedad { banks: [...] }
+            if (parsed && !Array.isArray(parsed) && Array.isArray(parsed.banks)) {
+                return { questions: [], importedBanksBundle: parsed.banks };
+            }
+
+            // Caso C: Es un único banco exportado { title, questions: [...] } o arreglo directo de preguntas
+            const list = Array.isArray(parsed) ? parsed : (Array.isArray(parsed.questions) ? parsed.questions : []);
             const out = [];
 
             list.forEach((item, idx) => {
@@ -1207,7 +1603,7 @@ function parseUniversalQuestions(rawText) {
                     const w1 = String(item[3] || '').trim();
                     const w2 = String(item[4] || '').trim();
                     const w3 = String(item[5] || '').trim();
-                    const lvl = Math.min(5, Math.max(1, parseInt(item[6], 10) || ((idx % 5) + 1)));
+                    const lvl = Math.min(5, Math.max(1, parseInt(item[6], 10) || (Math.floor(idx / 5) % 5) + 1));
                     if (qText && correct) {
                         out.push({
                             id: 'q_' + Date.now() + '_' + idx,
@@ -1220,16 +1616,23 @@ function parseUniversalQuestions(rawText) {
                     }
                 } else if (item && typeof item === 'object') {
                     const qText = String(item.question || item.pregunta || '').trim();
-                    const correct = String(item.correct || item.correcta || '').trim();
-                    const wrongArr = Array.isArray(item.wrong)
-                        ? item.wrong.map(x => String(x).trim())
-                        : [item.wrong1, item.wrong2, item.wrong3].filter(Boolean).map(x => String(x).trim());
-                    const lvl = Math.min(5, Math.max(1, parseInt(item.level || item.idcategoria, 10) || ((idx % 5) + 1)));
+                    const correct = String(item.correct || item.correcta || item.respuesta || '').trim();
+                    let wrongArr = [];
+                    if (Array.isArray(item.wrong)) {
+                        wrongArr = item.wrong.map(x => String(x).trim());
+                    } else if (Array.isArray(item.incorrectas)) {
+                        wrongArr = item.incorrectas.map(x => String(x).trim());
+                    } else {
+                        wrongArr = [item.wrong1, item.wrong2, item.wrong3, item.inc1, item.inc2, item.inc3]
+                            .filter(v => v !== undefined && v !== null && String(v).trim() !== '')
+                            .map(x => String(x).trim());
+                    }
+                    const lvl = Math.min(5, Math.max(1, parseInt(item.level || item.nivel || item.idcategoria, 10) || (Math.floor(idx / 5) % 5) + 1));
                     const url = String(item.url || '').trim();
-                    if (qText && correct && wrongArr.length >= 1) {
+                    if (qText && correct) {
                         while (wrongArr.length < 3) wrongArr.push(`Opción ${wrongArr.length + 2}`);
                         out.push({
-                            id: 'q_' + Date.now() + '_' + idx,
+                            id: item.id || ('q_' + Date.now() + '_' + idx),
                             question: qText,
                             correct,
                             wrong: wrongArr.slice(0, 3),
@@ -1239,13 +1642,12 @@ function parseUniversalQuestions(rawText) {
                     }
                 }
             });
-            return out;
+            return { questions: out, importedBanksBundle: null, suggestedTitle: parsed.title || '' };
         } catch (e) {
-            // Continúa con el parser de líneas
+            // Continúa con el parser de líneas si no es JSON válido
         }
     }
 
-    // 2. Analizar línea por línea (Excel TSV, CSV o Texto Plano con | ; :)
     const lines = trimmed.split(/\r?\n/);
     const results = [];
 
@@ -1255,25 +1657,24 @@ function parseUniversalQuestions(rawText) {
 
         let parts = [];
         if (cleanLine.includes('\t')) {
-            parts = cleanLine.split('\t').map(s => s.trim());
+            parts = cleanLine.split('\t').map(s => s.replace(/^"|"$/g, '').trim());
         } else if (cleanLine.includes('|')) {
-            parts = cleanLine.split('|').map(s => s.trim());
+            parts = splitCSVLine(cleanLine, '|');
         } else if (cleanLine.includes(';')) {
-            parts = cleanLine.split(';').map(s => s.trim());
+            parts = splitCSVLine(cleanLine, ';');
         } else if (cleanLine.includes(',')) {
-            parts = cleanLine.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g) || cleanLine.split(',');
-            parts = parts.map(s => s.replace(/^"|"$/g, '').trim());
+            parts = splitCSVLine(cleanLine, ',');
         } else if (cleanLine.includes(':')) {
             parts = cleanLine.split(':').map(s => s.trim());
         }
 
         if (parts.length < 5) return;
-        if (idx === 0 && /^(pregunta|question)$/i.test(parts[0])) return;
+        if (idx === 0 && /^(pregunta|question)$/i.test(parts[0].replace(/^"|"$/g, '').trim())) return;
 
         const [qText, correct, w1, w2, w3, rawLevel, rawUrl] = parts;
         if (!qText || !correct) return;
 
-        const level = Math.min(5, Math.max(1, parseInt(rawLevel, 10) || ((results.length % 5) + 1)));
+        const level = Math.min(5, Math.max(1, parseInt(rawLevel, 10) || (Math.floor(results.length / 5) % 5) + 1));
         const url = (rawUrl && /^https?:\/\//i.test(rawUrl)) ? rawUrl : '';
 
         results.push({
@@ -1286,19 +1687,62 @@ function parseUniversalQuestions(rawText) {
         });
     });
 
-    return results;
+    return { questions: results, importedBanksBundle: null };
 }
 
 function processBulkImport() {
     const raw = document.getElementById('bulkRawTextarea').value;
-    const bankTitle = document.getElementById('bulkBankNameInput').value.trim() || t('importedBankDefaultName');
     const mode = document.getElementById('bulkOperationMode').value;
+    const parsedResult = parseUniversalQuestions(raw);
 
-    const parsedQuestions = parseUniversalQuestions(raw);
-    if (parsedQuestions.length === 0) {
+    // Si el archivo pegado/subido es un paquete completo de bancos ("Exportar Todo")
+    if (parsedResult.importedBanksBundle && parsedResult.importedBanksBundle.length > 0) {
+        let importedCount = 0;
+        parsedResult.importedBanksBundle.forEach((b, bIdx) => {
+            if (!b || !Array.isArray(b.questions) || b.questions.length === 0) return;
+            const bTitle = b.title || `Banco Importado ${bIdx + 1}`;
+            const bTeacher = b.teacher || appState.activeTeacher;
+            if (!appState.teachers.includes(bTeacher)) {
+                appState.teachers.push(bTeacher);
+            }
+            const existing = appState.banks.find(
+                x => x.title.toLowerCase() === bTitle.toLowerCase() && x.teacher === bTeacher
+            );
+            if (existing) {
+                if (mode === 'replace') existing.questions = b.questions;
+                else existing.questions.push(...b.questions);
+            } else {
+                appState.banks.unshift({
+                    id: b.id || ('bank_' + Date.now() + '_' + bIdx),
+                    title: bTitle,
+                    teacher: bTeacher,
+                    createdAt: b.createdAt || new Date().toISOString().slice(0, 10),
+                    questions: b.questions
+                });
+            }
+            importedCount++;
+        });
+
+        if (importedCount > 0) {
+            saveTeachersToStorage();
+            saveBanksToStorage();
+            renderBanksList();
+            updateLobbySelectors();
+            document.getElementById('bulkRawTextarea').value = '';
+            showToast(`¡${importedCount} ${t('toastBanksBundleImported')}!`);
+            return;
+        }
+    }
+
+    const parsedQuestions = parsedResult.questions;
+    if (!parsedQuestions || parsedQuestions.length === 0) {
         showToast(t('toastNoValidQuestions'), 'fa-circle-exclamation');
         return;
     }
+
+    const bankTitle = document.getElementById('bulkBankNameInput').value.trim()
+        || parsedResult.suggestedTitle
+        || t('importedBankDefaultName');
 
     const existingBank = appState.banks.find(
         b => b.title.toLowerCase() === bankTitle.toLowerCase() && b.teacher === appState.activeTeacher
@@ -1351,7 +1795,7 @@ function renderBanksList() {
             <div class="bank-item-card">
                 <div class="bank-item-info">
                     <h4>${b.title}</h4>
-                    <p><i class="fa-solid fa-chalkboard-user text-indigo"></i> ${b.teacher} • <strong>${b.questions.length} ${t('unitQuestionsShort')}</strong> (L1:${byLvl[0]} L2:${byLvl[1]} L3:${byLvl[2]} L4:${byLvl[3]} L5:${byLvl[4]})</p>
+                    <p><i class="fa-solid fa-chalkboard-user text-indigo"></i> ${b.teacher} • <strong>${b.questions.length} ${t('unitQuestionsShort')}</strong> (N1:${byLvl[0]} N2:${byLvl[1]} N3:${byLvl[2]} N4:${byLvl[3]} N5:${byLvl[4]})</p>
                 </div>
                 <div class="bank-item-actions">
                     <button class="btn-icon-sm" onclick="exportSingleBankJSON('${b.id}')" title="${t('titleExportSingleBank')}">
@@ -1369,7 +1813,13 @@ function renderBanksList() {
 function exportSingleBankJSON(bankId) {
     const bank = appState.banks.find(b => b.id === bankId);
     if (!bank) return;
-    const blob = new Blob([JSON.stringify(bank.questions, null, 2)], { type: 'application/json' });
+    const payload = {
+        title: bank.title,
+        teacher: bank.teacher,
+        createdAt: bank.createdAt,
+        questions: bank.questions
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = `banco-${bank.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.json`;
@@ -1384,22 +1834,38 @@ function exportAllBanksJSON() {
     a.click();
 }
 
-function deleteBank(bankId) {
-    if (appState.banks.length <= 1) {
-        showToast(t('toastKeepOneBank'), 'fa-triangle-exclamation');
-        return;
+function ensureAtLeastDefaultBank() {
+    if (appState.banks.length === 0) {
+        appState.banks.push({
+            id: 'bank_general_default_' + Date.now(),
+            title: 'Cultura General y Ciencias (Por Defecto)',
+            teacher: appState.activeTeacher,
+            createdAt: new Date().toISOString().slice(0, 10),
+            questions: JSON.parse(JSON.stringify(SAMPLE_25_QUESTIONS))
+        });
+        showToast(t('toastLastBankResetDefault'), 'fa-rotate');
     }
+}
+
+function deleteBank(bankId) {
     appState.banks = appState.banks.filter(b => b.id !== bankId);
+    if (appState.banks.length === 0) {
+        ensureAtLeastDefaultBank();
+    } else {
+        showToast(t('toastBankDeleted'));
+    }
     saveBanksToStorage();
     renderBanksList();
     updateLobbySelectors();
-    showToast(t('toastBankDeleted'));
 }
 
 function restoreDefaultBanks() {
     DEFAULT_BANKS.forEach(def => {
-        if (!appState.banks.some(b => b.id === def.id)) {
-            appState.banks.push(JSON.parse(JSON.stringify(def)));
+        if (!appState.banks.some(b => b.title.toLowerCase() === def.title.toLowerCase())) {
+            appState.banks.push({
+                ...JSON.parse(JSON.stringify(def)),
+                teacher: appState.activeTeacher
+            });
         }
     });
     saveBanksToStorage();
@@ -1409,7 +1875,7 @@ function restoreDefaultBanks() {
 }
 
 /* --------------------------------------------------------------------------
-   7. MOTOR DE JUEGO ESTILO "QUIÉN QUIERE SER MILLONARIO"
+   8. MOTOR DE JUEGO ESTILO "QUIÉN QUIERE SER MILLONARIO" (SIN MEZCLAR NIVELES)
    -------------------------------------------------------------------------- */
 function shuffleArray(arr) {
     const copy = [...arr];
@@ -1434,22 +1900,28 @@ function startNewGame() {
         return;
     }
 
-    const qPerRound = parseInt(document.getElementById('questionsPerRoundSelect').value, 10) || 5;
+    const activeRoundLevels = ROUND_TIERS
+        .filter(r => r.enabled)
+        .map(r => r.level)
+        .sort((a, b) => a - b);
+
+    if (activeRoundLevels.length === 0) {
+        showToast(t('toastSelectAtLeastOneRound'), 'fa-triangle-exclamation');
+        return;
+    }
+
+    const qPerRound = getQuestionsPerRoundVal();
     const combinedQuestions = selectedBanks.flatMap(b =>
         b.questions.map(q => ({ ...q, sourceTopic: b.title }))
     );
 
-    if (combinedQuestions.length < 5) {
-        showToast(t('toastMin5Questions'), 'fa-circle-exclamation');
-        return;
-    }
-
+    // Construir piscinas estrictamente por cada nivel activo (NUNCA mezclar preguntas de otro nivel)
     const poolByRound = {};
-    for (let lvl = 1; lvl <= 5; lvl++) {
-        let levelPool = shuffleArray(combinedQuestions.filter(q => q.level === lvl));
+    for (const lvl of activeRoundLevels) {
+        const levelPool = shuffleArray(combinedQuestions.filter(q => Number(q.level) === lvl));
         if (levelPool.length < qPerRound) {
-            const others = shuffleArray(combinedQuestions.filter(q => q.level !== lvl));
-            levelPool = [...levelPool, ...others];
+            showToast(t('toastInsufficientLevelQuestions')(lvl, qPerRound, levelPool.length), 'fa-circle-exclamation');
+            return;
         }
         poolByRound[lvl] = levelPool;
     }
@@ -1465,7 +1937,9 @@ function startNewGame() {
         topicLabel,
         teacherName: appState.activeTeacher,
         questionsPerRound: qPerRound,
-        currentRound: 1,
+        activeRoundLevels,
+        currentRoundIdx: 0,
+        currentRound: activeRoundLevels[0],
         questionInRound: 1,
         score: 0,
         safeScore: 0,
@@ -1500,11 +1974,14 @@ function startGameTimer() {
 function renderLiveLadder() {
     const container = document.getElementById('liveLadderContainer');
     if (!container) return;
-    const qPerR = appState.game.questionsPerRound;
+    const g = appState.game;
+    const qPerR = g.questionsPerRound;
 
-    container.innerHTML = [...ROUND_TIERS].reverse().map(tier => {
-        const isCurrent = tier.level === appState.game.currentRound;
-        const isDone = tier.level < appState.game.currentRound;
+    const activeTiers = ROUND_TIERS.filter(tItem => g.activeRoundLevels.includes(tItem.level));
+
+    container.innerHTML = [...activeTiers].reverse().map(tier => {
+        const isCurrent = tier.level === g.currentRound;
+        const isDone = tier.level < g.currentRound;
         const cls = isCurrent ? 'active-round' : (isDone ? 'completed-round' : '');
         const roundTotal = tier.points * qPerR;
 
@@ -1522,7 +1999,7 @@ function loadNextGameQuestion() {
     g.isLocked = false;
 
     document.getElementById('gamePlayerName').textContent = g.player;
-    document.getElementById('gameRoundDisplay').textContent = `${g.currentRound} / 5`;
+    document.getElementById('gameRoundDisplay').textContent = `${g.currentRound} (${g.currentRoundIdx + 1}/${g.activeRoundLevels.length})`;
     document.getElementById('gameCurrentScore').textContent = g.score.toLocaleString();
     document.getElementById('gameSafeScore').textContent = g.safeScore.toLocaleString();
     document.getElementById('gameTimerDisplay').textContent = `${g.seconds}s`;
@@ -1533,18 +2010,11 @@ function loadNextGameQuestion() {
     renderLiveLadder();
 
     const pool = g.poolByRound[g.currentRound];
-    const nextQ = pool.shift() || {
-        question: '¿Cuánto es 12 × 12?',
-        correct: '144',
-        wrong: ['124', '148', '132'],
-        level: g.currentRound,
-        url: '',
-        sourceTopic: g.topicLabel
-    };
+    const nextQ = pool.shift();
     g.currentQuestion = nextQ;
 
-    const tierInfo = ROUND_TIERS[g.currentRound - 1];
-    document.getElementById('gameCategoryBadge').textContent = `${nextQ.sourceTopic || g.topicLabel} • +${tierInfo.points} pts`;
+    const tierInfo = ROUND_TIERS.find(r => r.level === g.currentRound) || ROUND_TIERS[0];
+    document.getElementById('gameCategoryBadge').textContent = `${nextQ.sourceTopic || g.topicLabel} • +${tierInfo.points.toLocaleString()} pts`;
     document.getElementById('gameQuestionCounter').textContent =
         `${t('questionWord')} ${g.questionInRound} ${t('ofWord')} ${g.questionsPerRound} (${t('roundWord')} ${g.currentRound})`;
     document.getElementById('gameQuestionText').textContent = nextQ.question;
@@ -1603,7 +2073,8 @@ function selectAnswer(idx) {
         if (chosenOpt.isCorrect) {
             playSoundEffect('correct');
             chosenBtn.classList.add('correct-reveal');
-            const tierPts = ROUND_TIERS[g.currentRound - 1].points;
+            const tierInfo = ROUND_TIERS.find(r => r.level === g.currentRound) || ROUND_TIERS[0];
+            const tierPts = tierInfo.points;
             g.score += tierPts;
             document.getElementById('gameCurrentScore').textContent = g.score.toLocaleString();
 
@@ -1634,14 +2105,16 @@ function advanceAfterCorrect() {
     const g = appState.game;
     if (g.questionInRound >= g.questionsPerRound) {
         g.safeScore = g.score;
-        if (g.currentRound >= 5) {
+        if (g.currentRoundIdx >= g.activeRoundLevels.length - 1) {
             playSoundEffect('roundUp');
             finishGameSession('victory');
         } else {
-            g.currentRound++;
+            const finishedRound = g.currentRound;
+            g.currentRoundIdx++;
+            g.currentRound = g.activeRoundLevels[g.currentRoundIdx];
             g.questionInRound = 1;
             playSoundEffect('roundUp');
-            showToast(`¡${t('roundWord')} ${g.currentRound - 1} ${t('toastRoundClearedPre')} ${g.safeScore.toLocaleString()} pts`, 'fa-shield-halved');
+            showToast(`¡${t('roundWord')} ${finishedRound} ${t('toastRoundClearedPre')} ${g.safeScore.toLocaleString()} pts`, 'fa-shield-halved');
             loadNextGameQuestion();
         }
     } else {
@@ -1651,7 +2124,7 @@ function advanceAfterCorrect() {
 }
 
 /* --------------------------------------------------------------------------
-   8. COMODINES ESTILO MILLONARIO (50:50, CAMBIAR PREGUNTA, PÚBLICO)
+   9. COMODINES ESTILO MILLONARIO (50:50, CAMBIAR PREGUNTA, PÚBLICO)
    -------------------------------------------------------------------------- */
 function useLifeline5050() {
     const g = appState.game;
@@ -1676,6 +2149,14 @@ function useLifeline5050() {
 function useLifelineSwap() {
     const g = appState.game;
     if (g.isLocked || !g.lifelines.swap) return;
+
+    const remainingNeededAfterCurrent = g.questionsPerRound - g.questionInRound;
+    const pool = g.poolByRound[g.currentRound] || [];
+    if (pool.length <= remainingNeededAfterCurrent) {
+        showToast(t('toastNoMoreSwapQuestions'), 'fa-triangle-exclamation');
+        return;
+    }
+
     g.lifelines.swap = false;
     document.getElementById('lifelineSwap').disabled = true;
     playSoundEffect('lifeline');
@@ -1791,7 +2272,7 @@ function finishGameSession(reason) {
 }
 
 /* --------------------------------------------------------------------------
-   9. SISTEMA DE RANKING (FILTRABLE POR TEMÁTICA, DOCENTE Y JUGADOR)
+   10. SISTEMA DE RANKING (PODIO LIMPIO SIN #1,#2,#3 Y NUMERACIÓN DESDE #4)
    -------------------------------------------------------------------------- */
 function renderRankingTable() {
     const bankFilter = document.getElementById('rankingBankFilter');
@@ -1829,10 +2310,10 @@ function renderRankingTable() {
 
     tbody.innerHTML = filtered.map((row, idx) => {
         const medals = ['👑 🥇', '🥈', '🥉'];
-        const posBadge = idx < 3 ? `${medals[idx]} #${idx + 1}` : `#${idx + 1}`;
+        const posBadge = idx < 3 ? medals[idx] : `#${idx + 1}`;
         return `
             <tr>
-                <td class="font-mono"><strong>${posBadge}</strong></td>
+                <td class="font-mono" style="font-size:${idx < 3 ? '1.15rem' : '0.84rem'};"><strong>${posBadge}</strong></td>
                 <td><strong>${row.player}</strong></td>
                 <td><span class="badge-soft">${row.topic}</span></td>
                 <td>${row.teacher}</td>
@@ -1869,13 +2350,21 @@ function clearRankingHistory() {
 }
 
 /* --------------------------------------------------------------------------
-   10. EXPOSICIÓN EXPLÍCITA AL ÁMBITO GLOBAL (WINDOW) Y ARRANQUE
+   11. EXPOSICIÓN EXPLÍCITA AL ÁMBITO GLOBAL (WINDOW) Y ARRANQUE
    -------------------------------------------------------------------------- */
 Object.assign(window, {
     switchView,
     openNewTeacherModal,
+    openEditTeacherModal,
+    openDeleteTeacherModal,
     handleTeacherChange,
     toggleMixTopicsMode,
+    handleQPerRoundChange,
+    toggleRoundTierEnabled,
+    handleSingleTierPointInput,
+    handleMaxTotalScoreInput,
+    savePointsAndRoundsConfig,
+    resetPointsAndRoundsDefault,
     updateLobbySummary,
     startNewGame,
     useLifeline5050,

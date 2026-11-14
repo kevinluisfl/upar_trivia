@@ -28,7 +28,7 @@
             <!-- Logo y Título -->
             <div class="brand-group">
                 <div class="brand-icon">
-                    <i class="fa-solid fa-Graduation-Cap fa-brain"></i>
+                    <i class="fa-solid fa-brain"></i>
                 </div>
                 <div>
                     <div class="brand-title-row">
@@ -140,13 +140,21 @@
                         <span class="badge-soft" id="uiLobbyRoundsBadge">5 Rondas • 25 Preguntas</span>
                     </div>
 
-                    <!-- Selector de Perfil Docente -->
+                    <!-- Selector de Perfil Docente con Editar y Eliminar -->
                     <div class="form-group">
                         <div class="label-row">
                             <label for="teacherProfileSelect" id="uiLabelTeacher">Perfil Docente Activo</label>
-                            <button type="button" class="btn-link-xs" onclick="openNewTeacherModal()">
-                                <i class="fa-solid fa-user-plus"></i> <span id="uiBtnAddTeacher">Nuevo Docente</span>
-                            </button>
+                            <div class="teacher-actions-inline">
+                                <button type="button" class="btn-link-xs" onclick="openNewTeacherModal()" title="Crear nuevo docente">
+                                    <i class="fa-solid fa-user-plus"></i> <span id="uiBtnAddTeacher">Nuevo</span>
+                                </button>
+                                <button type="button" class="btn-link-xs" onclick="openEditTeacherModal()" title="Renombrar docente activo">
+                                    <i class="fa-solid fa-pen"></i> <span id="uiBtnEditTeacher">Editar</span>
+                                </button>
+                                <button type="button" class="btn-link-xs text-danger-link" onclick="openDeleteTeacherModal()" title="Eliminar docente activo">
+                                    <i class="fa-regular fa-trash-can"></i> <span id="uiBtnDeleteTeacher">Eliminar</span>
+                                </button>
+                            </div>
                         </div>
                         <select id="teacherProfileSelect" onchange="handleTeacherChange(this.value)"></select>
                     </div>
@@ -157,14 +165,20 @@
                         <input type="text" id="playerNameInput" placeholder="Ej. Sofía Martínez - 601" maxlength="35">
                     </div>
 
-                    <!-- Modo de Selección de Temática (Única vs Mixta) -->
+                    <!-- Modo de Selección de Temática (Única vs Mixta + Incluir otros perfiles) -->
                     <div class="form-group">
-                        <div class="label-row">
+                        <div class="label-row" style="flex-wrap: wrap; gap: 0.4rem;">
                             <label id="uiLabelTopicSelect">Temática de la Trivia</label>
-                            <label class="inline-checkbox">
-                                <input type="checkbox" id="mixTopicsToggle" onchange="toggleMixTopicsMode()">
-                                <span id="uiLabelMixMode">Mezclar varias temáticas</span>
-                            </label>
+                            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                                <label class="inline-checkbox">
+                                    <input type="checkbox" id="showAllProfilesBanksToggle" onchange="updateLobbySelectors()">
+                                    <span id="uiLabelShowOtherProfiles">Incluir otros perfiles</span>
+                                </label>
+                                <label class="inline-checkbox">
+                                    <input type="checkbox" id="mixTopicsToggle" onchange="toggleMixTopicsMode()">
+                                    <span id="uiLabelMixMode">Mezclar temáticas</span>
+                                </label>
+                            </div>
                         </div>
 
                         <!-- Selector de Temática Única -->
@@ -180,9 +194,9 @@
                     <div class="form-row-2">
                         <div class="form-group">
                             <label for="questionsPerRoundSelect" id="uiLabelQPerRound">Preguntas por Ronda</label>
-                            <select id="questionsPerRoundSelect" onchange="updateLobbySummary()">
-                                <option value="3">3 por ronda (15 total - Rápida)</option>
-                                <option value="5" selected>5 por ronda (25 total - Clásica)</option>
+                            <select id="questionsPerRoundSelect" onchange="handleQPerRoundChange()">
+                                <option value="3">3 por ronda (Rápida)</option>
+                                <option value="5" selected>5 por ronda (Clásica)</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -200,41 +214,38 @@
                     </button>
                 </div>
 
-                <!-- Columna Derecha: Escalera de Premios y Resumen Rápido -->
+                <!-- Columna Derecha: Escalera de Premios Editable y Selección de Rondas -->
                 <div class="studio-card">
-                    <div class="card-section-header">
+                    <div class="card-section-header" style="margin-bottom: 0.6rem;">
                         <h2><i class="fa-solid fa-stairs text-indigo"></i> <span id="uiLadderPreviewTitle">Estructura de Rondas y Puntos</span></h2>
+                        <div style="display: flex; gap: 0.4rem;">
+                            <button type="button" class="btn-mini" onclick="savePointsAndRoundsConfig()" title="Guardar configuración y ajustar ranking">
+                                <i class="fa-solid fa-floppy-disk"></i> <span id="uiBtnSavePointsConfig">Guardar Puntuación</span>
+                            </button>
+                            <button type="button" class="btn-icon-sm" onclick="resetPointsAndRoundsDefault()" title="Restaurar valores por defecto">
+                                <i class="fa-solid fa-rotate-left"></i>
+                            </button>
+                        </div>
                     </div>
-                    <p class="text-muted-sm" id="uiLadderPreviewDesc">
-                        Supera cada ronda para asegurar tu puntaje acumulado. Si te equivocas, conservas los puntos asegurados de la última ronda completada.
+                    <p class="text-muted-sm" id="uiLadderPreviewDesc" style="margin-bottom: 0.75rem;">
+                        Marca qué rondas deseas jugar y personaliza los puntos por pregunta o el puntaje máximo total (al guardar, el ranking se ajusta proporcionalmente).
                     </p>
 
-                    <div class="ladder-preview-list">
-                        <div class="ladder-tier tier-5">
-                            <span class="tier-badge">Ronda 5</span>
-                            <span class="tier-name" id="uiTier5Name">Muy Difícil (Experto)</span>
-                            <span class="tier-points">+4,500 pts / preg</span>
+                    <!-- Barra de Puntaje Máximo Total Editable -->
+                    <div class="max-score-config-bar">
+                        <div class="max-score-label-group">
+                            <i class="fa-solid fa-coins text-amber"></i>
+                            <span id="uiLabelMaxTotalScore">Puntaje Máximo Total a Obtener:</span>
                         </div>
-                        <div class="ladder-tier tier-4">
-                            <span class="tier-badge">Ronda 4</span>
-                            <span class="tier-name" id="uiTier4Name">Difícil (Avanzado)</span>
-                            <span class="tier-points">+2,500 pts / preg</span>
+                        <div class="max-score-input-group">
+                            <input type="number" id="maxTotalScoreInput" min="1" step="10" value="50000" oninput="handleMaxTotalScoreInput(this.value)" class="font-mono">
+                            <span class="pts-suffix">pts</span>
                         </div>
-                        <div class="ladder-tier tier-3">
-                            <span class="tier-badge">Ronda 3</span>
-                            <span class="tier-name" id="uiTier3Name">Intermedia</span>
-                            <span class="tier-points">+1,500 pts / preg</span>
-                        </div>
-                        <div class="ladder-tier tier-2">
-                            <span class="tier-badge">Ronda 2</span>
-                            <span class="tier-name" id="uiTier2Name">Fácil (Básico)</span>
-                            <span class="tier-points">+1,000 pts / preg</span>
-                        </div>
-                        <div class="ladder-tier tier-1">
-                            <span class="tier-badge">Ronda 1</span>
-                            <span class="tier-name" id="uiTier1Name">Muy Fácil (Inicial)</span>
-                            <span class="tier-points">+500 pts / preg</span>
-                        </div>
+                    </div>
+
+                    <!-- Lista de las 5 Rondas con Checkbox de Activación e Input de Puntos -->
+                    <div class="ladder-preview-list" id="editableLadderList">
+                        <!-- Renderizado dinámicamente por JS -->
                     </div>
 
                     <div class="Quick-tip-banner">
@@ -315,12 +326,12 @@
                         </div>
                         <h2 id="gameQuestionText" class="question-title">¿Cargando pregunta?</h2>
 
-                        <!-- Contenedor Inteligente de Imagen (Solo se muestra si la URL existe y carga bien) -->
+                        <!-- Contenedor Inteligente de Imagen -->
                         <div id="gameImageWrapper" class="question-image-wrapper hidden">
                             <img id="gameQuestionImage" src="" alt="Ilustración de pregunta">
                         </div>
 
-                        <!-- Gráfico de ayuda del público (oculto por defecto) -->
+                        <!-- Gráfico de ayuda del público -->
                         <div id="audienceChartBox" class="audience-chart-box hidden"></div>
 
                         <!-- Mensaje de confirmación en vivo -->
@@ -350,7 +361,7 @@
 
                 <!-- Panel Derecho: Escalera de Progreso en Tiempo Real -->
                 <aside class="game-ladder-card studio-card">
-                    <h3 class="ladder-side-title"><i class="fa-solid fa-Parthenon fa-award text-indigo"></i> <span id="uiLiveLadderTitle">Escalera de Rondas</span></h3>
+                    <h3 class="ladder-side-title"><i class="fa-solid fa-award text-indigo"></i> <span id="uiLiveLadderTitle">Escalera de Rondas</span></h3>
                     <div id="liveLadderContainer" class="live-ladder-container">
                         <!-- Renderizado dinámicamente por JS -->
                     </div>
@@ -433,68 +444,14 @@
 
                     <!-- ===== GUÍA 1: EXCEL / CSV / TSV ===== -->
                     <div id="fmtGuideExcel" class="format-guide-box">
-                        <div class="guide-header">
-                            <strong><i class="fa-solid fa-circle-check text-emerald"></i> Cómo cargar desde Excel o Google Sheets:</strong>
-                            <div class="guide-actions">
-                                <button type="button" class="btn-mini" onclick="insertSampleIntoBulk('excel')">
-                                    <i class="fa-solid fa-wand-magic-sparkles"></i> Ver Ejemplo
-                                </button>
-                                <button type="button" class="btn-mini" onclick="downloadTemplateFile('csv')">
-                                    <i class="fa-solid fa-download"></i> Plantilla Excel (.csv)
-                                </button>
-                            </div>
-                        </div>
-                        <p class="guide-text">
-                            Crea una tabla en Excel con <strong>6 o 7 columnas</strong>, selecciona las filas, cópialas (<code>Ctrl+C</code>) y pégalas abajo, o sube tu archivo <code>.csv</code>:
-                        </p>
-                        <div class="schema-chips">
-                            <span>1. Pregunta</span>
-                            <span class="chip-correct">2. Respuesta Correcta</span>
-                            <span>3. Incorrecta 1</span>
-                            <span>4. Incorrecta 2</span>
-                            <span>5. Incorrecta 3</span>
-                            <span>6. Nivel (1 a 5, opc)</span>
-                            <span>7. URL Imagen (opc)</span>
-                        </div>
+                        <!-- Renderizado dinámicamente con selector de separador CSV -->
                     </div>
 
                     <!-- ===== GUÍA 2: TEXTO PLANO ===== -->
-                    <div id="fmtGuideText" class="format-guide-box hidden">
-                        <div class="guide-header">
-                            <strong><i class="fa-solid fa-circle-check text-emerald"></i> Cómo cargar en Texto Plano (una pregunta por línea):</strong>
-                            <div class="guide-actions">
-                                <button type="button" class="btn-mini" onclick="insertSampleIntoBulk('text')">
-                                    <i class="fa-solid fa-wand-magic-sparkles"></i> Ver Ejemplo
-                                </button>
-                                <button type="button" class="btn-mini" onclick="downloadTemplateFile('txt')">
-                                    <i class="fa-solid fa-download"></i> Plantilla (.txt)
-                                </button>
-                            </div>
-                        </div>
-                        <p class="guide-text">
-                            Escribe una pregunta por línea separando cada dato con barra <code>|</code>, punto y coma <code>;</code> o dos puntos <code>:</code>. La <strong>primera respuesta</strong> siempre debe ser la correcta (el juego las desordena al jugar):
-                        </p>
-                        <code class="code-sample">Pregunta | Respuesta Correcta | Incorrecta 1 | Incorrecta 2 | Incorrecta 3 | Nivel(1-5) | URL_Imagen(opcional)</code>
-                    </div>
+                    <div id="fmtGuideText" class="format-guide-box hidden"></div>
 
                     <!-- ===== GUÍA 3: JSON (MODERNO O CLÁSICO TECHMATH) ===== -->
-                    <div id="fmtGuideJson" class="format-guide-box hidden">
-                        <div class="guide-header">
-                            <strong><i class="fa-solid fa-circle-check text-emerald"></i> Cómo cargar en formato JSON (Compatible con tu versión anterior):</strong>
-                            <div class="guide-actions">
-                                <button type="button" class="btn-mini" onclick="insertSampleIntoBulk('json')">
-                                    <i class="fa-solid fa-wand-magic-sparkles"></i> Ver Ejemplo
-                                </button>
-                                <button type="button" class="btn-mini" onclick="downloadTemplateFile('json')">
-                                    <i class="fa-solid fa-download"></i> Plantilla (.json)
-                                </button>
-                            </div>
-                        </div>
-                        <p class="guide-text">
-                            Acepta tanto objetos JSON modernos como el arreglo clásico <code>data_</code> de <em>TECHMATH</em>:
-                        </p>
-                        <code class="code-sample">[ ["¿Cuánto es 5x7?", "", "35", "30", "40", "45", 1], ... ]  ó  [ {"question":"...", "correct":"...", "wrong":["..."], "level":1} ]</code>
-                    </div>
+                    <div id="fmtGuideJson" class="format-guide-box hidden"></div>
 
                     <!-- Área de Pegado o Subida de Archivo -->
                     <div class="bulk-input-area">
@@ -576,7 +533,7 @@
                     <div class="about-item">
                         <div class="about-icon"><i class="fa-solid fa-layer-group"></i></div>
                         <h4 id="uiAbout1Title">1. 5 Niveles de Dificultad</h4>
-                        <p id="uiAbout1Desc">La partida avanza a través de 5 rondas progresivas (Muy Fácil a Muy Difícil). Al completar todas las preguntas de una ronda, aseguras el puntaje acumulado.</p>
+                        <p id="uiAbout1Desc">La partida avanza a través de las rondas seleccionadas (Muy Fácil a Muy Difícil). Al completar todas las preguntas de una ronda, aseguras el puntaje acumulado.</p>
                     </div>
                     <div class="about-item">
                         <div class="about-icon"><i class="fa-solid fa-shield-halved"></i></div>
@@ -604,6 +561,9 @@
             <div id="appModalBody" class="modal-body-text"></div>
             <div id="appModalInputWrapper" class="form-group hidden">
                 <input type="text" id="appModalInput" placeholder="Nombre del docente (ej. Prof. Kevin Florez)">
+            </div>
+            <div id="appModalSelectWrapper" class="form-group hidden">
+                <select id="appModalSelect"></select>
             </div>
             <div class="modal-actions" id="appModalActions"></div>
         </div>

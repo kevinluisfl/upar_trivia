@@ -342,7 +342,7 @@ body {
 
 .home-grid {
     display: grid;
-    grid-template-columns: 1.1fr 0.9fr;
+    grid-template-columns: 1.05fr 0.95fr;
     gap: 1.5rem;
     align-items: start;
 }
@@ -366,25 +366,43 @@ body {
     color: var(--text-secondary);
 }
 
+.teacher-actions-inline {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+}
+
 .btn-link-xs {
     background: none;
     border: none;
     color: var(--accent-light);
-    font-size: 0.74rem;
+    font-size: 0.73rem;
     font-weight: 700;
     cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.btn-link-xs:hover {
+    text-decoration: underline;
+}
+
+.text-danger-link {
+    color: var(--danger) !important;
 }
 
 .inline-checkbox {
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
-    font-size: 0.75rem;
+    font-size: 0.74rem;
     cursor: pointer;
     color: var(--accent-light) !important;
 }
 
 input[type="text"],
+input[type="number"],
 select,
 textarea {
     width: 100%;
@@ -399,7 +417,13 @@ textarea {
     transition: border-color 0.15s, box-shadow 0.15s;
 }
 
+select option {
+    background-color: var(--card);
+    color: var(--text);
+}
+
 input[type="text"]:focus,
+input[type="number"]:focus,
 select:focus,
 textarea:focus {
     border-color: var(--accent-light);
@@ -471,44 +495,125 @@ textarea:focus {
     box-shadow: 0 10px 24px rgba(79, 70, 229, 0.42);
 }
 
-/* Vista Previa de Escalera de Rondas */
+/* Escalera de Rondas Editable + Selección de Rondas */
 .text-muted-sm {
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     color: var(--text-muted);
     line-height: 1.45;
     margin-bottom: 1rem;
 }
 
+.max-score-config-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.6rem 0.85rem;
+    border-radius: 0.8rem;
+    background: var(--accent-soft);
+    border: 1px solid var(--accent-border);
+    margin-bottom: 0.75rem;
+}
+
+.max-score-label-group {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: var(--text);
+}
+
+.max-score-input-group {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.max-score-input-group input {
+    width: 110px;
+    padding: 0.3rem 0.55rem;
+    text-align: right;
+    font-weight: 800;
+    font-size: 0.84rem;
+    background: var(--card);
+}
+
+.pts-suffix {
+    font-size: 0.74rem;
+    font-weight: 800;
+    color: var(--accent-light);
+    font-family: 'JetBrains Mono', monospace;
+}
+
 .ladder-preview-list {
     display: flex;
     flex-direction: column;
-    gap: 0.55rem;
-    margin-bottom: 1.15rem;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
 }
 
 .ladder-tier {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0.65rem 0.9rem;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
     border-radius: 0.75rem;
     background: var(--card-inner);
     border: 1px solid var(--border);
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     font-weight: 700;
+    transition: opacity 0.15s;
+}
+
+.ladder-tier.tier-disabled {
+    opacity: 0.45;
+}
+
+.tier-left-check {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+.tier-left-check input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--accent);
+    cursor: pointer;
 }
 
 .tier-badge {
-    padding: 0.18rem 0.55rem;
+    padding: 0.18rem 0.5rem;
     border-radius: 0.45rem;
     background: var(--accent-soft);
     color: var(--accent-light);
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.72rem;
+    font-size: 0.7rem;
 }
 
-.tier-points {
+.tier-right-input {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.tier-right-input input {
+    width: 82px;
+    padding: 0.25rem 0.45rem;
+    text-align: right;
+    font-size: 0.78rem;
+    font-weight: 800;
     color: var(--emerald);
+    background: var(--card);
+    border-radius: 0.5rem;
+}
+
+.tier-unit-label {
+    font-size: 0.68rem;
+    color: var(--text-muted);
     font-family: 'JetBrains Mono', monospace;
 }
 
@@ -971,7 +1076,18 @@ textarea:focus {
 
 .guide-actions {
     display: flex;
+    flex-wrap: wrap;
+    align-items: center;
     gap: 0.4rem;
+}
+
+.mini-sep-select {
+    width: auto !important;
+    padding: 0.22rem 0.5rem !important;
+    font-size: 0.7rem !important;
+    border-radius: 0.45rem !important;
+    background: var(--card) !important;
+    font-weight: 700 !important;
 }
 
 .btn-mini {
@@ -1182,7 +1298,7 @@ textarea:focus {
     border: 1px solid var(--border);
     border-radius: 1.3rem;
     padding: 1.75rem;
-    max-width: 440px;
+    max-width: 460px;
     width: 100%;
     text-align: center;
     box-shadow: var(--shadow-lg);
@@ -1210,6 +1326,7 @@ textarea:focus {
 
 .modal-actions {
     display: flex;
+    flex-wrap: wrap;
     gap: 0.65rem;
     justify-content: center;
 }
