@@ -29,7 +29,7 @@ let ROUND_TIERS = JSON.parse(JSON.stringify(DEFAULT_ROUND_TIERS));
    -------------------------------------------------------------------------- */
 const I18N = {
     es: {
-        badgeEdition: 'Edición Millonario',
+        badgeEdition: 'Edición Reality QQSS',
         mainSubtitle: 'Plataforma interactiva de trivias por niveles para el aula',
         navPlay: 'Jugar',
         navBanks: 'Bancos y Carga Masiva',
@@ -221,7 +221,7 @@ const I18N = {
         importedBankDefaultName: 'Banco Importado'
     },
     en: {
-        badgeEdition: 'Millionaire Edition',
+        badgeEdition: 'Reality Edition WWBW',
         mainSubtitle: 'Interactive tiered trivia platform for the classroom',
         navPlay: 'Play',
         navBanks: 'Question Banks & Bulk Load',
@@ -238,7 +238,7 @@ const I18N = {
         defaultNarrator: 'System default',
         labelAutoRead: 'Read questions aloud',
         labelSfx: 'Sound effects (Millionaire)',
-        testVoicePhrase: 'Welcome to UparTrivia Studio, Millionaire classroom edition.',
+        testVoicePhrase: 'Welcome to UparTrivia Studio, Who Wants to Be a Genius edition.', 
 
         // Lobby / Home
         lobbyTitle: 'New Game Setup',
