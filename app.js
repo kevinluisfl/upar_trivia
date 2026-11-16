@@ -1,6 +1,6 @@
 /**
  * ==============================================================================
- * UPARTRIVIA STUDIO - MOTOR PRINCIPAL (MODERNIZACIÓN DE TECHMATH)
+ * UPARTRIVIA STUDIO - MOTOR PRINCIPAL (MODERNIZACIÓN)
  * ==============================================================================
  */
 
@@ -109,8 +109,6 @@ const I18N = {
         labelTargetBank: 'Nombre de la Temática / Banco',
         placeholderTargetBank: 'Ej. Matemáticas 6° - Fracciones',
         labelBulkAction: 'Modo de Carga',
-        optBulkAppend: 'Crear nuevo o añadir al existente',
-        optBulkReplace: 'Reemplazar preguntas si ya existe',
         tabFmtExcel: '1. Excel / CSV',
         tabFmtText: '2. Texto Plano',
         tabFmtJson: '3. JSON',
@@ -131,7 +129,7 @@ const I18N = {
         guideTextTitle: 'Cómo cargar en Texto Plano (una pregunta por línea):',
         guideTextDesc: 'Escribe una pregunta por línea separando cada dato con barra <code>|</code>, punto y coma <code>;</code> o dos puntos <code>:</code>. La <strong>primera respuesta</strong> siempre debe ser la correcta:',
         guideTextCode: 'Pregunta | Respuesta Correcta | Incorrecta 1 | Incorrecta 2 | Incorrecta 3 | Nivel(1-5) | URL_Imagen(opcional)',
-        guideJsonTitle: 'Cómo cargar en formato JSON (Compatible con exportación de Bancos y TECHMATH):',
+        guideJsonTitle: 'Cómo cargar en formato JSON (Compatible con exportación de Bancos):',
         guideJsonDesc: 'Acepta archivos exportados desde UparTrivia (individuales o completos), objetos JSON modernos o arreglos clásicos:',
         placeholderBulkTextarea: 'Pega aquí tus preguntas desde Excel, texto plano o JSON...',
         btnUploadFile: 'Subir Archivo (.csv, .txt, .json)',
@@ -218,7 +216,22 @@ const I18N = {
         btnConfirmClearRank: 'Sí, Borrar Todo',
         toastRankingCleared: 'Historial de puntajes vaciado',
         sampleBankDefaultName: 'Cultura General y Ciencias (25 Preg)',
-        importedBankDefaultName: 'Banco Importado'
+        importedBankDefaultName: 'Banco Importado',
+
+        optBulkNew: 'Crear banco nuevo',
+        optBulkAppendExisting: 'Añadir a banco(s) existente(s)',
+        labelSelectExistingBanks: 'Selecciona uno o varios bancos existentes',
+        noExistingBanksToAppend: 'No hay bancos existentes disponibles.',
+        titleEditBank: 'Editar banco',
+        editBankModalTitle: 'Editar Banco de Preguntas',
+        labelEditBankTitle: 'Nombre del Banco',
+        labelEditBankTeacher: 'Docente',
+        editBankQuestionsLabel: 'Preguntas del banco',
+        btnAddQuestionRow: 'Añadir pregunta',
+        btnCancelBankEdit: 'Cancelar',
+        btnSaveBankEdit: 'Guardar cambios',
+        toastBankUpdated: 'Banco actualizado correctamente',
+        toastSelectExistingBankTarget: 'Selecciona al menos un banco existente para añadir las preguntas'
     },
     en: {
         badgeEdition: 'Reality Edition WWBW',
@@ -301,8 +314,6 @@ const I18N = {
         labelTargetBank: 'Topic / Bank Name',
         placeholderTargetBank: 'E.g. 6th Grade Math - Fractions',
         labelBulkAction: 'Load Mode',
-        optBulkAppend: 'Create new or append to existing',
-        optBulkReplace: 'Replace questions if bank exists',
         tabFmtExcel: '1. Excel / CSV',
         tabFmtText: '2. Plain Text',
         tabFmtJson: '3. JSON',
@@ -323,7 +334,7 @@ const I18N = {
         guideTextTitle: 'How to load from Plain Text (one question per line):',
         guideTextDesc: 'Write one question per line separating fields with a pipe <code>|</code>, semicolon <code>;</code> or colon <code>:</code>. The <strong>first answer</strong> must always be the correct one:',
         guideTextCode: 'Question | Correct Answer | Wrong 1 | Wrong 2 | Wrong 3 | Level(1-5) | Image_URL(optional)',
-        guideJsonTitle: 'How to load in JSON format (Compatible with exported banks & TECHMATH):',
+        guideJsonTitle: 'How to load in JSON format (Compatible with exported banks):',
         guideJsonDesc: 'Accepts single or full JSON files exported from UparTrivia, modern JSON objects, or classic arrays:',
         placeholderBulkTextarea: 'Paste your questions here from Excel, plain text, or JSON...',
         btnUploadFile: 'Upload File (.csv, .txt, .json)',
@@ -410,7 +421,21 @@ const I18N = {
         btnConfirmClearRank: 'Yes, Clear All',
         toastRankingCleared: 'Leaderboard history cleared',
         sampleBankDefaultName: 'General Knowledge & Science (25 Q)',
-        importedBankDefaultName: 'Imported Bank'
+        importedBankDefaultName: 'Imported Bank',
+        optBulkNew: 'Create new bank',
+        optBulkAppendExisting: 'Add to existing bank(s)',
+        labelSelectExistingBanks: 'Select one or more existing banks',
+        noExistingBanksToAppend: 'No existing banks available.',
+        titleEditBank: 'Edit bank',
+        editBankModalTitle: 'Edit Question Bank',
+        labelEditBankTitle: 'Bank Name',
+        labelEditBankTeacher: 'Teacher',
+        editBankQuestionsLabel: 'Bank questions',
+        btnAddQuestionRow: 'Add question',
+        btnCancelBankEdit: 'Cancel',
+        btnSaveBankEdit: 'Save changes',
+        toastBankUpdated: 'Bank updated successfully',
+        toastSelectExistingBankTarget: 'Select at least one existing bank to append the questions'
     }
 };
 
@@ -464,7 +489,7 @@ const DEFAULT_BANKS = [
     },
     {
         id: 'bank_math_default',
-        title: 'Matemáticas y Lógica (TECHMATH)',
+        title: 'Matemáticas y Lógica',
         teacher: 'Prof. Kevin Flórez',
         createdAt: '2026-10-15',
         questions: [
@@ -1128,9 +1153,21 @@ function applyTranslations() {
     setTextIfPresent('uiAbout3Title', t('about3Title'));
     setTextIfPresent('uiAbout3Desc', t('about3Desc'));
 
+    setTextIfPresent('optBulkNew', t('optBulkNew'));
+    setTextIfPresent('optBulkAppendExisting', t('optBulkAppendExisting'));
+    setTextIfPresent('uiLabelSelectExistingBanks', t('labelSelectExistingBanks'));
+    setTextIfPresent('uiEditBankModalTitle', t('editBankModalTitle'));
+    setTextIfPresent('uiLabelEditBankTitle', t('labelEditBankTitle'));
+    setTextIfPresent('uiLabelEditBankTeacher', t('labelEditBankTeacher'));
+    setTextIfPresent('uiEditBankQuestionsLabel', t('editBankQuestionsLabel'));
+    setTextIfPresent('uiBtnAddQuestionRow', t('btnAddQuestionRow'));
+    setTextIfPresent('uiBtnCancelBankEdit', t('btnCancelBankEdit'));
+    setTextIfPresent('uiBtnSaveBankEdit', t('btnSaveBankEdit'));
+    handleBulkModeChange();
+
     const footerP = document.querySelector('.app-footer p');
     if (footerP) {
-        footerP.innerHTML = `<strong>UparTrivia Studio</strong> — ${t('footerCreatedBy')} <a href="https://github.com/kevinluisfl" target="_blank">Kevin Luis Flórez Lozada (klfl)</a> 💻`;
+        footerP.innerHTML = `<strong>UparTrivia Studio</strong> — ${t('footerCreatedBy')} <a href="https://github.com/kevinluisfl" target="_blank">(klfl)</a> 💻`;
     }
 
     updateLobbySelectors();
@@ -1196,7 +1233,7 @@ function loadInitialStorage() {
     } else {
         appState.ranking = (Array.isArray(legacyScores) ? legacyScores : []).map(d => ({
             player: d.user || 'JUGADOR',
-            topic: 'Matemáticas (TECHMATH)',
+            topic: 'Matemáticas',
             teacher: 'Prof. Kevin Flórez',
             round: d.ronda || 1,
             score: d.puntos || 0,
@@ -1692,10 +1729,9 @@ function parseUniversalQuestions(rawText) {
 
 function processBulkImport() {
     const raw = document.getElementById('bulkRawTextarea').value;
-    const mode = document.getElementById('bulkOperationMode').value;
+    const mode = document.getElementById('bulkOperationMode')?.value || 'create_new';
     const parsedResult = parseUniversalQuestions(raw);
 
-    // Si el archivo pegado/subido es un paquete completo de bancos ("Exportar Todo")
     if (parsedResult.importedBanksBundle && parsedResult.importedBanksBundle.length > 0) {
         let importedCount = 0;
         parsedResult.importedBanksBundle.forEach((b, bIdx) => {
@@ -1705,21 +1741,13 @@ function processBulkImport() {
             if (!appState.teachers.includes(bTeacher)) {
                 appState.teachers.push(bTeacher);
             }
-            const existing = appState.banks.find(
-                x => x.title.toLowerCase() === bTitle.toLowerCase() && x.teacher === bTeacher
-            );
-            if (existing) {
-                if (mode === 'replace') existing.questions = b.questions;
-                else existing.questions.push(...b.questions);
-            } else {
-                appState.banks.unshift({
-                    id: b.id || ('bank_' + Date.now() + '_' + bIdx),
-                    title: bTitle,
-                    teacher: bTeacher,
-                    createdAt: b.createdAt || new Date().toISOString().slice(0, 10),
-                    questions: b.questions
-                });
-            }
+            appState.banks.unshift({
+                id: 'bank_' + Date.now() + '_' + bIdx + '_' + Math.floor(Math.random() * 1000),
+                title: bTitle,
+                teacher: bTeacher,
+                createdAt: new Date().toISOString().slice(0, 10),
+                questions: JSON.parse(JSON.stringify(b.questions))
+            });
             importedCount++;
         });
 
@@ -1728,6 +1756,7 @@ function processBulkImport() {
             saveBanksToStorage();
             renderBanksList();
             updateLobbySelectors();
+            handleBulkModeChange();
             document.getElementById('bulkRawTextarea').value = '';
             showToast(`¡${importedCount} ${t('toastBanksBundleImported')}!`);
             return;
@@ -1740,34 +1769,49 @@ function processBulkImport() {
         return;
     }
 
+    if (mode === 'append_existing') {
+        const selectedIds = Array.from(document.querySelectorAll('.target-existing-bank-check:checked')).map(el => el.value);
+        if (selectedIds.length === 0) {
+            showToast(t('toastSelectExistingBankTarget'), 'fa-circle-exclamation');
+            return;
+        }
+        const targetBanks = appState.banks.filter(b => selectedIds.includes(b.id));
+        targetBanks.forEach(tb => {
+            const clonedQs = parsedQuestions.map((q, idx) => ({
+                ...JSON.parse(JSON.stringify(q)),
+                id: 'q_' + Date.now() + '_' + idx + '_' + Math.floor(Math.random() * 1000)
+            }));
+            tb.questions.push(...clonedQs);
+            tb.createdAt = new Date().toISOString().slice(0, 10);
+        });
+
+        saveBanksToStorage();
+        renderBanksList();
+        updateLobbySelectors();
+        handleBulkModeChange();
+        document.getElementById('bulkRawTextarea').value = '';
+        const names = targetBanks.map(tb => tb.title).join(', ');
+        showToast(`¡${parsedQuestions.length} ${t('toastBankSavedPre')} "${names}"!`);
+        return;
+    }
+
+    // Modo 'create_new': siempre crea un banco nuevo tal cual viene en la carga
     const bankTitle = document.getElementById('bulkBankNameInput').value.trim()
         || parsedResult.suggestedTitle
         || t('importedBankDefaultName');
 
-    const existingBank = appState.banks.find(
-        b => b.title.toLowerCase() === bankTitle.toLowerCase() && b.teacher === appState.activeTeacher
-    );
-
-    if (existingBank) {
-        if (mode === 'replace') {
-            existingBank.questions = parsedQuestions;
-        } else {
-            existingBank.questions.push(...parsedQuestions);
-        }
-        existingBank.createdAt = new Date().toISOString().slice(0, 10);
-    } else {
-        appState.banks.unshift({
-            id: 'bank_' + Date.now(),
-            title: bankTitle,
-            teacher: appState.activeTeacher,
-            createdAt: new Date().toISOString().slice(0, 10),
-            questions: parsedQuestions
-        });
-    }
+    appState.banks.unshift({
+        id: 'bank_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+        title: bankTitle,
+        teacher: appState.activeTeacher,
+        createdAt: new Date().toISOString().slice(0, 10),
+        questions: parsedQuestions
+    });
 
     saveBanksToStorage();
     renderBanksList();
     updateLobbySelectors();
+    handleBulkModeChange();
     document.getElementById('bulkRawTextarea').value = '';
     showToast(`¡${parsedQuestions.length} ${t('toastBankSavedPre')} "${bankTitle}"!`);
 }
@@ -1798,6 +1842,9 @@ function renderBanksList() {
                     <p><i class="fa-solid fa-chalkboard-user text-indigo"></i> ${b.teacher} • <strong>${b.questions.length} ${t('unitQuestionsShort')}</strong> (N1:${byLvl[0]} N2:${byLvl[1]} N3:${byLvl[2]} N4:${byLvl[3]} N5:${byLvl[4]})</p>
                 </div>
                 <div class="bank-item-actions">
+                    <button class="btn-icon-sm" onclick="openEditBankModal('${b.id}')" title="${t('titleEditBank')}">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                    </button>
                     <button class="btn-icon-sm" onclick="exportSingleBankJSON('${b.id}')" title="${t('titleExportSingleBank')}">
                         <i class="fa-solid fa-download"></i>
                     </button>
@@ -1808,6 +1855,34 @@ function renderBanksList() {
             </div>
         `;
     }).join('');
+}
+
+let editingBankId = null;
+let editingBankDraftQuestions = [];
+
+function handleBulkModeChange() {
+    const modeEl = document.getElementById('bulkOperationMode');
+    const groupEl = document.getElementById('appendExistingBanksGroup');
+    const listEl = document.getElementById('targetExistingBanksList');
+    if (!modeEl || !groupEl || !listEl) return;
+
+    const isAppendExisting = modeEl.value === 'append_existing';
+    groupEl.classList.toggle('hidden', !isAppendExisting);
+
+    if (isAppendExisting) {
+        if (appState.banks.length === 0) {
+            listEl.innerHTML = `<p class="text-muted-sm" style="margin:0;">${t('noExistingBanksToAppend')}</p>`;
+            return;
+        }
+        listEl.innerHTML = appState.banks.map(b => `
+            <label class="multi-topic-item">
+                <span>
+                    <input type="checkbox" class="target-existing-bank-check" value="${b.id}">
+                    <strong>${b.title}</strong> <small style="color:var(--text-muted);">(${b.teacher} • ${b.questions.length} ${t('unitQuestionsShort')})</small>
+                </span>
+            </label>
+        `).join('');
+    }
 }
 
 function exportSingleBankJSON(bankId) {
@@ -1848,15 +1923,38 @@ function ensureAtLeastDefaultBank() {
 }
 
 function deleteBank(bankId) {
-    appState.banks = appState.banks.filter(b => b.id !== bankId);
-    if (appState.banks.length === 0) {
-        ensureAtLeastDefaultBank();
-    } else {
-        showToast(t('toastBankDeleted'));
-    }
-    saveBanksToStorage();
-    renderBanksList();
-    updateLobbySelectors();
+    const bank = appState.banks.find(b => b.id === bankId);
+    if (!bank) return;
+
+    const bodyMsg = appState.lang === 'en'
+        ? `Are you sure you want to delete the question bank <strong>"${bank.title}"</strong> (${bank.questions.length} ${t('unitQuestionsShort')})?`
+        : `¿Seguro que deseas eliminar el banco de preguntas <strong>"${bank.title}"</strong> (${bank.questions.length} ${t('unitQuestionsShort')})?`;
+
+    const confirmLabel = appState.lang === 'en' ? 'Yes, Delete Bank' : 'Sí, Eliminar Banco';
+
+    showAppModal({
+        icon: 'fa-trash-can',
+        title: t('titleDeleteBank'),
+        bodyHtml: bodyMsg,
+        buttons: [
+            { label: t('btnCancel'), className: 'btn-utility' },
+            {
+                label: confirmLabel,
+                className: 'btn-danger-sm',
+                onClick: () => {
+                    appState.banks = appState.banks.filter(b => b.id !== bankId);
+                    if (appState.banks.length === 0) {
+                        ensureAtLeastDefaultBank();
+                    } else {
+                        showToast(t('toastBankDeleted'));
+                    }
+                    saveBanksToStorage();
+                    renderBanksList();
+                    updateLobbySelectors();
+                }
+            }
+        ]
+    });
 }
 
 function restoreDefaultBanks() {
@@ -1872,6 +1970,142 @@ function restoreDefaultBanks() {
     renderBanksList();
     updateLobbySelectors();
     showToast(t('toastDefaultsRestored'));
+}
+
+function openEditBankModal(bankId) {
+    const bank = appState.banks.find(b => b.id === bankId);
+    if (!bank) return;
+
+    editingBankId = bank.id;
+    editingBankDraftQuestions = JSON.parse(JSON.stringify(bank.questions || []));
+
+    document.getElementById('editBankTitleInput').value = bank.title;
+    const teacherSel = document.getElementById('editBankTeacherSelect');
+    teacherSel.innerHTML = appState.teachers.map(tc =>
+        `<option value="${tc}" ${tc === bank.teacher ? 'selected' : ''}>${tc}</option>`
+    ).join('');
+
+    renderBankEditorQuestions();
+    document.getElementById('bankEditorModal').classList.add('active');
+}
+
+function closeBankEditorModal() {
+    editingBankId = null;
+    editingBankDraftQuestions = [];
+    document.getElementById('bankEditorModal')?.classList.remove('active');
+}
+
+function renderBankEditorQuestions() {
+    const listEl = document.getElementById('editBankQuestionsList');
+    if (!listEl) return;
+
+    listEl.innerHTML = editingBankDraftQuestions.map((q, idx) => {
+        const w0 = (q.wrong && q.wrong[0]) || '';
+        const w1 = (q.wrong && q.wrong[1]) || '';
+        const w2 = (q.wrong && q.wrong[2]) || '';
+        const lvl = parseInt(q.level, 10) || 1;
+        const url = q.url || '';
+
+        return `
+            <div class="edit-q-card">
+                <div class="edit-q-top">
+                    <span class="badge-soft font-mono">#${idx + 1}</span>
+                    <div style="display:flex; align-items:center; gap:0.45rem;">
+                        <label style="font-size:0.72rem; font-weight:700;">${t('roundWord')}:</label>
+                        <select style="width:auto; padding:0.25rem 0.5rem; font-size:0.75rem;" onchange="updateDraftQuestionField(${idx}, 'level', parseInt(this.value, 10))">
+                            <option value="1" ${lvl === 1 ? 'selected' : ''}>1</option>
+                            <option value="2" ${lvl === 2 ? 'selected' : ''}>2</option>
+                            <option value="3" ${lvl === 3 ? 'selected' : ''}>3</option>
+                            <option value="4" ${lvl === 4 ? 'selected' : ''}>4</option>
+                            <option value="5" ${lvl === 5 ? 'selected' : ''}>5</option>
+                        </select>
+                        <button type="button" class="btn-icon-sm" onclick="removeDraftQuestion(${idx})" title="Eliminar pregunta">
+                            <i class="fa-regular fa-trash-can"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <input type="text" value="${(q.question || '').replace(/"/g, '"')}" placeholder="Pregunta" oninput="updateDraftQuestionField(${idx}, 'question', this.value)">
+
+                <div class="edit-q-grid-2">
+                    <input type="text" value="${(q.correct || '').replace(/"/g, '"')}" placeholder="Respuesta correcta" oninput="updateDraftQuestionField(${idx}, 'correct', this.value)">
+                    <input type="text" value="${url.replace(/"/g, '"')}" placeholder="URL de imagen (opcional)" oninput="updateDraftQuestionField(${idx}, 'url', this.value)">
+                </div>
+
+                <div class="edit-q-grid-3">
+                    <input type="text" value="${w0.replace(/"/g, '"')}" placeholder="Incorrecta 1" oninput="updateDraftQuestionWrong(${idx}, 0, this.value)">
+                    <input type="text" value="${w1.replace(/"/g, '"')}" placeholder="Incorrecta 2" oninput="updateDraftQuestionWrong(${idx}, 1, this.value)">
+                    <input type="text" value="${w2.replace(/"/g, '"')}" placeholder="Incorrecta 3" oninput="updateDraftQuestionWrong(${idx}, 2, this.value)">
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function updateDraftQuestionField(idx, field, val) {
+    if (!editingBankDraftQuestions[idx]) return;
+    editingBankDraftQuestions[idx][field] = val;
+}
+
+function updateDraftQuestionWrong(idx, wIdx, val) {
+    if (!editingBankDraftQuestions[idx]) return;
+    if (!Array.isArray(editingBankDraftQuestions[idx].wrong)) {
+        editingBankDraftQuestions[idx].wrong = ['', '', ''];
+    }
+    editingBankDraftQuestions[idx].wrong[wIdx] = val;
+}
+
+function addQuestionToBankEditor() {
+    editingBankDraftQuestions.push({
+        id: 'q_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+        question: '',
+        correct: '',
+        wrong: ['', '', ''],
+        level: 1,
+        url: ''
+    });
+    renderBankEditorQuestions();
+}
+
+function removeDraftQuestion(idx) {
+    editingBankDraftQuestions.splice(idx, 1);
+    renderBankEditorQuestions();
+}
+
+function saveEditedBankChanges() {
+    if (!editingBankId) return;
+    const bank = appState.banks.find(b => b.id === editingBankId);
+    if (!bank) return;
+
+    const newTitle = document.getElementById('editBankTitleInput').value.trim() || bank.title;
+    const newTeacher = document.getElementById('editBankTeacherSelect').value || bank.teacher;
+
+    const cleanedQuestions = editingBankDraftQuestions
+        .map((q, i) => ({
+            id: q.id || ('q_' + Date.now() + '_' + i),
+            question: (q.question || '').trim(),
+            correct: (q.correct || '').trim(),
+            wrong: [
+                (q.wrong?.[0] || '').trim() || 'Opción B',
+                (q.wrong?.[1] || '').trim() || 'Opción C',
+                (q.wrong?.[2] || '').trim() || 'Opción D'
+            ],
+            level: Math.min(5, Math.max(1, parseInt(q.level, 10) || 1)),
+            url: (q.url || '').trim()
+        }))
+        .filter(q => q.question && q.correct);
+
+    bank.title = newTitle;
+    bank.teacher = newTeacher;
+    bank.questions = cleanedQuestions;
+    bank.createdAt = new Date().toISOString().slice(0, 10);
+
+    saveBanksToStorage();
+    renderBanksList();
+    updateLobbySelectors();
+    handleBulkModeChange();
+    closeBankEditorModal();
+    showToast(`${t('toastBankUpdated')}: "${bank.title}"`);
 }
 
 /* --------------------------------------------------------------------------
@@ -2042,6 +2276,7 @@ function loadNextGameQuestion() {
         const txt = document.getElementById(`ansText${idx}`);
         btn.className = 'answer-option';
         btn.disabled = false;
+        btn.blur(); // <-- Quita la selección pegada en móvil al pasar de pregunta
         txt.textContent = opt.text;
     });
 
@@ -2326,20 +2561,61 @@ function renderRankingTable() {
     }).join('');
 }
 
+function getRankingActiveFilterState() {
+    const topic = document.getElementById('rankingBankFilter')?.value || 'all';
+    const teacher = document.getElementById('rankingTeacherFilter')?.value || 'all';
+    const searchVal = (document.getElementById('rankingSearchInput')?.value || '').trim().toLowerCase();
+
+    const hasFilter = topic !== 'all' || teacher !== 'all' || Boolean(searchVal);
+
+    const matches = (entry) => {
+        const matchTopic = topic === 'all' || entry.topic === topic;
+        const matchTeacher = teacher === 'all' || entry.teacher === teacher;
+        const matchPlayer = !searchVal || String(entry.player || '').toLowerCase().includes(searchVal);
+        return matchTopic && matchTeacher && matchPlayer;
+    };
+
+    return { topic, teacher, searchVal, hasFilter, matches };
+}
+
 function clearRankingHistory() {
     if (appState.ranking.length === 0) return;
+
+    const { topic, teacher, searchVal, hasFilter, matches } = getRankingActiveFilterState();
+    const targetEntries = appState.ranking.filter(matches);
+
+    if (targetEntries.length === 0) {
+        showToast(t('emptyRanking'), 'fa-circle-info');
+        return;
+    }
+
+    let filterSummary = '';
+    if (hasFilter) {
+        const parts = [];
+        if (topic !== 'all') parts.push(`<strong>${topic}</strong>`);
+        if (teacher !== 'all') parts.push(`<strong>${teacher}</strong>`);
+        if (searchVal) parts.push(`jugador "<strong>${searchVal}</strong>"`);
+        filterSummary = `<br><span style="font-size:0.78rem; color:var(--text-muted);">Filtro activo: ${parts.join(' • ')} (${targetEntries.length} registro(s)).</span>`;
+    } else {
+        filterSummary = `<br><span style="font-size:0.78rem; color:var(--text-muted);">Se eliminarán <strong>${targetEntries.length}</strong> registro(s) de todo el ranking.</span>`;
+    }
+
     showAppModal({
         icon: 'fa-trash-can',
         title: t('modalClearRankTitle'),
-        bodyHtml: t('modalClearRankBody'),
+        bodyHtml: `${t('modalClearRankBody')}${filterSummary}`,
         buttons: [
             { label: t('btnCancel'), className: 'btn-utility' },
             {
                 label: t('btnConfirmClearRank'),
                 className: 'btn-danger-sm',
                 onClick: () => {
-                    appState.ranking = [];
-                    localStorage.removeItem('datos');
+                    if (!hasFilter) {
+                        appState.ranking = [];
+                        localStorage.removeItem('datos');
+                    } else {
+                        appState.ranking = appState.ranking.filter(entry => !matches(entry));
+                    }
                     saveRankingToStorage();
                     renderRankingTable();
                     showToast(t('toastRankingCleared'));
@@ -2348,6 +2624,35 @@ function clearRankingHistory() {
         ]
     });
 }
+
+function toggleTriviaFocusMode() {
+    const isFocus = document.body.classList.toggle('focus-mode');
+    const icon = document.getElementById('focusTriviaIcon');
+    const label = document.getElementById('uiBtnFocusTrivia');
+
+    if (icon) icon.className = isFocus ? 'fa-solid fa-compress' : 'fa-solid fa-expand';
+    if (label) {
+        label.textContent = isFocus
+            ? (appState.lang === 'en' ? 'Exit Focus' : 'Salir')
+            : (appState.lang === 'en' ? 'Focus' : 'Concentración');
+    }
+
+    if (isFocus && document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen().catch(() => {});
+    } else if (!isFocus && document.fullscreenElement && document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+    }
+}
+
+document.addEventListener('fullscreenchange', () => {
+    if (!document.fullscreenElement && document.body.classList.contains('focus-mode')) {
+        document.body.classList.remove('focus-mode');
+        const icon = document.getElementById('focusTriviaIcon');
+        const label = document.getElementById('uiBtnFocusTrivia');
+        if (icon) icon.className = 'fa-solid fa-expand';
+        if (label) label.textContent = appState.lang === 'en' ? 'Focus' : 'Concentración';
+    }
+});
 
 /* --------------------------------------------------------------------------
    11. EXPOSICIÓN EXPLÍCITA AL ÁMBITO GLOBAL (WINDOW) Y ARRANQUE
@@ -2384,7 +2689,16 @@ Object.assign(window, {
     exportSingleBankJSON,
     deleteBank,
     renderRankingTable,
-    clearRankingHistory
+    clearRankingHistory,
+    toggleTriviaFocusMode,
+    handleBulkModeChange,
+    openEditBankModal,
+    closeBankEditorModal,
+    addQuestionToBankEditor,
+    updateDraftQuestionField,
+    updateDraftQuestionWrong,
+    removeDraftQuestion,
+    saveEditedBankChanges
 });
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -2392,6 +2706,7 @@ window.addEventListener('DOMContentLoaded', () => {
     applyTheme();
     applyTranslations();
     updateLobbySelectors();
+    handleBulkModeChange();
 
     document.getElementById('btnThemeToggle').addEventListener('click', () => {
         appState.theme = appState.theme === 'dark' ? 'light' : 'dark';
@@ -2428,4 +2743,21 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btnTestVoice').addEventListener('click', () => {
         speakText(t('testVoicePhrase'));
     });
+});
+
+
+/* --- Receptor automático cuando corre dentro de UparApp Studio --- */
+if (window.self !== window.top || window.location.search.includes('suite=1')) {
+    const st = document.createElement('style');
+    st.textContent = `.brand-group, #appMainHeader .flex.items-center.gap-3:first-child, .app-header .header-top > div:first-child, #btnLangToggle, #btnThemeToggle, #langToggleBtn, #themeToggleBtn, footer, .app-footer, #appMainFooter { display: none !important; } .app-header .header-container, #appMainHeader > div { padding-top: 0.4rem !important; padding-bottom: 0.4rem !important; justify-content: center !important; } .subnav-bar { border-top: none !important; padding-top: 0 !important; }`;
+    document.head.appendChild(st);
+}
+window.addEventListener('message', (e) => {
+    if (e.data && e.data.type === 'UPAR_SUITE_SYNC') {
+        if (typeof appState === 'object') { appState.theme = e.data.theme; appState.lang = e.data.lang; }
+        if (typeof currentTheme !== 'undefined') currentTheme = e.data.theme;
+        if (typeof currentLang !== 'undefined') currentLang = e.data.lang;
+        if (typeof applyTheme === 'function') applyTheme();
+        if (typeof applyTranslations === 'function') applyTranslations();
+    }
 });

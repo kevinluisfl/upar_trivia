@@ -1384,3 +1384,131 @@ textarea:focus {
         grid-template-columns: 1fr;
     }
 }
+
+/* Desactivar hover pegajoso en pantallas táctiles móviles */
+@media (hover: none) {
+    .answer-option:hover:not(:disabled) {
+        border-color: var(--border);
+        background: var(--card-inner);
+        transform: none;
+    }
+}
+
+/* Modo Concentración / Proyección para UparTrivia */
+body.focus-mode .app-header,
+body.focus-mode .app-footer,
+body.focus-mode .game-ladder-card {
+    display: none !important;
+}
+
+body.focus-mode .main-container {
+    max-width: 1100px;
+    padding-top: 1rem;
+}
+
+body.focus-mode .game-layout {
+    grid-template-columns: 1fr !important;
+}
+
+@media (max-width: 760px) {
+    .header-container {
+        flex-wrap: nowrap !important;
+        padding: 0.45rem 0.65rem !important;
+        gap: 0.4rem !important;
+        justify-content: space-between !important;
+    }
+
+    .nav-tabs {
+        padding: 0.22rem !important;
+        gap: 0.15rem !important;
+        border-radius: 0.7rem !important;
+    }
+
+    .nav-tab .nav-text {
+        display: none !important;
+    }
+
+    .nav-tab {
+        width: 34px;
+        height: 32px;
+        padding: 0 !important;
+        justify-content: center;
+        border-radius: 0.5rem !important;
+        font-size: 0.85rem !important;
+    }
+
+    .header-utilities {
+        gap: 0.3rem !important;
+    }
+
+    .header-utilities .btn-utility {
+        padding: 0.4rem 0.55rem !important;
+        font-size: 0.76rem !important;
+    }
+
+    .settings-dropdown-wrapper {
+        position: static !important;
+    }
+
+    .settings-popover {
+        top: 54px !important;
+        left: 0.75rem !important;
+        right: 0.75rem !important;
+        width: auto !important;
+    }
+}
+
+.bank-editor-card {
+    max-width: 760px;
+    width: 100%;
+    text-align: left;
+    max-height: 88vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.bank-editor-questions-list {
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding-right: 0.25rem;
+    flex: 1;
+}
+
+.edit-q-card {
+    background: var(--card-inner);
+    border: 1px solid var(--border);
+    border-radius: 0.85rem;
+    padding: 0.85rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+}
+
+.edit-q-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.edit-q-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+}
+
+.edit-q-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+}
+
+@media (max-width: 640px) {
+    .edit-q-grid-2,
+    .edit-q-grid-3 {
+        grid-template-columns: 1fr;
+    }
+}

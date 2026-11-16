@@ -43,19 +43,19 @@
             <nav class="nav-tabs" id="mainNavTabs">
                 <button class="nav-tab active" data-view="home" onclick="switchView('home')">
                     <i class="fa-solid fa-play"></i>
-                    <span id="uiNavPlay">Jugar</span>
+                    <span id="uiNavPlay" class="nav-text">Jugar</span>
                 </button>
                 <button class="nav-tab" data-view="banks" onclick="switchView('banks')">
                     <i class="fa-solid fa-database"></i>
-                    <span id="uiNavBanks">Bancos y Carga Masiva</span>
+                    <span id="uiNavBanks" class="nav-text">Bancos y Carga Masiva</span>
                 </button>
                 <button class="nav-tab" data-view="ranking" onclick="switchView('ranking')">
                     <i class="fa-solid fa-trophy"></i>
-                    <span id="uiNavRanking">Ranking</span>
+                    <span id="uiNavRanking" class="nav-text">Ranking</span>
                 </button>
                 <button class="nav-tab" data-view="about" onclick="switchView('about')">
                     <i class="fa-solid fa-circle-info"></i>
-                    <span id="uiNavAbout">Cómo Jugar</span>
+                    <span id="uiNavAbout" class="nav-text">Cómo Jugar</span>
                 </button>
             </nav>
 
@@ -310,6 +310,10 @@
                             <button class="btn-lifeline btn-speak-q" onclick="speakCurrentQuestion()" title="Leer pregunta y opciones en voz alta">
                                 <i class="fa-solid fa-volume-high"></i>
                             </button>
+                            <button id="btnFocusTrivia" class="btn-lifeline" onclick="toggleTriviaFocusMode()" title="Modo Concentración / Pantalla Completa">
+                                <i id="focusTriviaIcon" class="fa-solid fa-expand"></i>
+                                <span id="uiBtnFocusTrivia">Concentración</span>
+                            </button>
                         </div>
 
                         <button id="btnRetireGame" class="btn-retire" onclick="retireFromGame()">
@@ -419,11 +423,16 @@
                         </div>
                         <div class="form-group">
                             <label for="bulkOperationMode" id="uiLabelBulkAction">Modo de Carga</label>
-                            <select id="bulkOperationMode">
-                                <option value="create_or_append" id="optBulkAppend">Crear nuevo o añadir al existente</option>
-                                <option value="replace" id="optBulkReplace">Reemplazar preguntas si ya existe</option>
+                            <select id="bulkOperationMode" onchange="handleBulkModeChange()">
+                                <option value="create_new" id="optBulkNew">Crear banco nuevo</option>
+                                <option value="append_existing" id="optBulkAppendExisting">Añadir a banco(s) existente(s)</option>
                             </select>
                         </div>
+                    </div>
+
+                    <div id="appendExistingBanksGroup" class="form-group hidden">
+                        <label id="uiLabelSelectExistingBanks">Selecciona uno o varios bancos existentes</label>
+                        <div id="targetExistingBanksList" class="multi-topic-box"></div>
                     </div>
 
                     <!-- Pestañas de Formato de Entrada (Excel/CSV, Texto Plano, JSON) -->
@@ -450,7 +459,7 @@
                     <!-- ===== GUÍA 2: TEXTO PLANO ===== -->
                     <div id="fmtGuideText" class="format-guide-box hidden"></div>
 
-                    <!-- ===== GUÍA 3: JSON (MODERNO O CLÁSICO TECHMATH) ===== -->
+                    <!-- ===== GUÍA 3: JSON (MODERNO O CLÁSICO ) ===== -->
                     <div id="fmtGuideJson" class="format-guide-box hidden"></div>
 
                     <!-- Área de Pegado o Subida de Archivo -->
@@ -566,6 +575,48 @@
                 <select id="appModalSelect"></select>
             </div>
             <div class="modal-actions" id="appModalActions"></div>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL DE EDICIÓN COMPLETA DE BANCO ==================== -->
+    <div id="bankEditorModal" class="modal-overlay">
+        <div class="modal-card bank-editor-card">
+            <div class="card-section-header" style="margin-bottom: 0.85rem;">
+                <h3 style="font-size: 1.05rem; font-weight: 800; display: flex; align-items: center; gap: 0.45rem;">
+                    <i class="fa-solid fa-pen-to-square text-indigo"></i>
+                    <span id="uiEditBankModalTitle">Editar Banco de Preguntas</span>
+                </h3>
+                <button type="button" class="btn-icon-sm" onclick="closeBankEditorModal()" title="Cerrar">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="form-row-2" style="text-align: left;">
+                <div class="form-group">
+                    <label for="editBankTitleInput" id="uiLabelEditBankTitle">Nombre del Banco</label>
+                    <input type="text" id="editBankTitleInput">
+                </div>
+                <div class="form-group">
+                    <label for="editBankTeacherSelect" id="uiLabelEditBankTeacher">Docente</label>
+                    <select id="editBankTeacherSelect"></select>
+                </div>
+            </div>
+
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.6rem;">
+                <strong style="font-size: 0.8rem;" id="uiEditBankQuestionsLabel">Preguntas del banco</strong>
+                <button type="button" class="btn-mini" onclick="addQuestionToBankEditor()">
+                    <i class="fa-solid fa-plus"></i> <span id="uiBtnAddQuestionRow">Añadir pregunta</span>
+                </button>
+            </div>
+
+            <div id="editBankQuestionsList" class="bank-editor-questions-list"></div>
+
+            <div class="modal-actions" style="margin-top: 1rem;">
+                <button type="button" class="btn-utility" onclick="closeBankEditorModal()" id="uiBtnCancelBankEdit">Cancelar</button>
+                <button type="button" class="btn-primary-md" onclick="saveEditedBankChanges()">
+                    <i class="fa-solid fa-floppy-disk"></i> <span id="uiBtnSaveBankEdit">Guardar cambios</span>
+                </button>
+            </div>
         </div>
     </div>
 
