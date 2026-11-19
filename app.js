@@ -136,6 +136,7 @@ const I18N = {
         btnProcessBulk: 'Procesar y Guardar Banco',
         titleExportSingleBank: 'Exportar este banco en JSON',
         titleDeleteBank: 'Eliminar banco',
+        toastMin5PerLevel: (details) => `Cada nivel (1 a 5) debe tener mínimo 5 preguntas. Revisar: ${details}`,
 
         // Ranking
         rankingTitle: 'Tabla de Posiciones',
@@ -341,6 +342,7 @@ const I18N = {
         btnProcessBulk: 'Process & Save Bank',
         titleExportSingleBank: 'Export this bank as JSON',
         titleDeleteBank: 'Delete bank',
+        toastMin5PerLevel: (details) => `Each level (1 to 5) must have at least 5 questions. Check: ${details}`,
 
         // Ranking
         rankingTitle: 'Leaderboard',
@@ -1769,6 +1771,24 @@ function processBulkImport() {
         return;
     }
 
+    const minRequiredPerLevel = 5;
+    const missingLevels = [];
+    for (let lvl = 1; lvl <= 5; lvl++) {
+        const countForLvl = parsedQuestions.filter(q => Number(q.level) === lvl).length;
+        if (countForLvl < minRequiredPerLevel) {
+            missingLevels.push(
+                appState.lang === 'en'
+                    ? `L${lvl} (${countForLvl}/5)`
+                    : `N${lvl} (${countForLvl}/5)`
+            );
+        }
+    }
+
+    if (missingLevels.length > 0) {
+        showToast(t('toastMin5PerLevel')(missingLevels.join(', ')), 'fa-triangle-exclamation');
+        return;
+    }
+
     if (mode === 'append_existing') {
         const selectedIds = Array.from(document.querySelectorAll('.target-existing-bank-check:checked')).map(el => el.value);
         if (selectedIds.length === 0) {
@@ -2243,8 +2263,28 @@ function loadNextGameQuestion() {
 
     renderLiveLadder();
 
+    if (!Array.isArray(g.poolByRound[g.currentRound])) {
+        g.poolByRound[g.currentRound] = [];
+    }
     const pool = g.poolByRound[g.currentRound];
+
+    // Si el pozo quedó vacío en una ronda con pocas preguntas, reponer desde los bancos seleccionados del mismo nivel
+    if (pool.length === 0) {
+        const selectedBanks = getSelectedBanksForGame();
+        const fallbackPool = shuffleArray(
+            selectedBanks
+                .flatMap(b => b.questions.map(q => ({ ...q, sourceTopic: b.title })))
+                .filter(q => Number(q.level) === Number(g.currentRound) && q.id !== g.currentQuestion?.id)
+        );
+        if (fallbackPool.length > 0) {
+            pool.push(...fallbackPool);
+        } else if (g.currentQuestion) {
+            pool.push(g.currentQuestion);
+        }
+    }
+
     const nextQ = pool.shift();
+    if (!nextQ) return;
     g.currentQuestion = nextQ;
 
     const tierInfo = ROUND_TIERS.find(r => r.level === g.currentRound) || ROUND_TIERS[0];
@@ -2276,7 +2316,7 @@ function loadNextGameQuestion() {
         const txt = document.getElementById(`ansText${idx}`);
         btn.className = 'answer-option';
         btn.disabled = false;
-        btn.blur(); // <-- Quita la selección pegada en móvil al pasar de pregunta
+        btn.blur();
         txt.textContent = opt.text;
     });
 
@@ -2385,11 +2425,21 @@ function useLifelineSwap() {
     const g = appState.game;
     if (g.isLocked || !g.lifelines.swap) return;
 
-    const remainingNeededAfterCurrent = g.questionsPerRound - g.questionInRound;
     const pool = g.poolByRound[g.currentRound] || [];
-    if (pool.length <= remainingNeededAfterCurrent) {
+    if (pool.length === 0) {
         showToast(t('toastNoMoreSwapQuestions'), 'fa-triangle-exclamation');
         return;
+    }
+
+    // Contar cuántas preguntas de este nivel existen en los bancos seleccionados
+    const selectedBanks = getSelectedBanksForGame();
+    const totalInLevel = selectedBanks
+        .flatMap(b => b.questions || [])
+        .filter(q => Number(q.level) === Number(g.currentRound)).length;
+
+    // Solo devolver al pozo si el nivel tiene 5 preguntas o menos; si tiene 6+, descartarla
+    if (totalInLevel <= 5 && g.currentQuestion) {
+        pool.push(g.currentQuestion);
     }
 
     g.lifelines.swap = false;
